@@ -1,40 +1,61 @@
 @import "tailwindcss";
 
+/*
+ * Soft and quiet: white panels floating on a light gray workspace, hairline borders,
+ * gentle shadows and a single calm blue for what is selected or primary.
+ */
 :root {
-  --background: #fafaf9;
-  --surface: #ffffff;
-  --foreground: #1c1917;
-  --muted: #78716c;
-  --border: #e7e5e4;
-  --accent: #4f46e5;
-  --danger: #dc2626;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0c0a09;
-    --surface: #1c1917;
-    --foreground: #fafaf9;
-    --muted: #a8a29e;
-    --border: #292524;
-    --accent: #818cf8;
-    --danger: #f87171;
-  }
+  --bg: #f4f5f7;
+  --panel: #ffffff;
+  --raised: #f5f6f8;
+  --hover: #f0f1f4;
+  --line: #e9eaee;
+  --line-strong: #dadce2;
+  --ink: #15171c;
+  --ink-2: #5a5f6b;
+  --ink-3: #9399a5;
+  --accent: #3d6bf5;
+  --accent-ink: #ffffff;
+  --accent-soft: #edf2ff;
+  --ok: #1f9d68;
+  --danger: #e5484d;
+  color-scheme: light;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-surface: var(--surface);
-  --color-foreground: var(--foreground);
-  --color-muted: var(--muted);
-  --color-border: var(--border);
+  --color-bg: var(--bg);
+  --color-panel: var(--panel);
+  --color-raised: var(--raised);
+  --color-hover: var(--hover);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-ink-3: var(--ink-3);
   --color-accent: var(--accent);
+  --color-accent-ink: var(--accent-ink);
+  --color-accent-soft: var(--accent-soft);
+  --color-ok: var(--ok);
   --color-danger: var(--danger);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --shadow-soft: 0 1px 2px rgba(16, 24, 40, 0.04), 0 4px 16px -4px rgba(16, 24, 40, 0.06);
+  --shadow-float: 0 1px 2px rgba(16, 24, 40, 0.05), 0 12px 32px -8px rgba(16, 24, 40, 0.12);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
+  background: var(--bg);
+  color: var(--ink);
+}
+
+::selection {
+  background: var(--accent-soft);
+}
+
+.scrollbar-none {
+  scrollbar-width: none;
+}
+
+input[type="range"] {
+  accent-color: var(--accent);
 }

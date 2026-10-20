@@ -6,7 +6,7 @@ import { insertApp } from "@/lib/apps/queries";
 
 export type CreateAppState = {
   errors?: Partial<Record<"name" | "bundleId" | "primaryLocale" | "form", string>>;
-  ok?: boolean;
+  createdId?: string;
 };
 
 export async function createApp(_: CreateAppState, formData: FormData): Promise<CreateAppState> {
@@ -26,14 +26,13 @@ export async function createApp(_: CreateAppState, formData: FormData): Promise<
   }
 
   try {
-    insertApp(parsed.data);
+    const app = insertApp(parsed.data);
+    revalidatePath("/");
+    return { createdId: app.id };
   } catch (error) {
     if (error instanceof Error && error.message.includes("UNIQUE")) {
       return { errors: { bundleId: "An app with this bundle ID already exists" } };
     }
     throw error;
   }
-
-  revalidatePath("/");
-  return { ok: true };
 }

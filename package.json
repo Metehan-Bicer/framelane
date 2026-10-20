@@ -7,15 +7,17 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "next typegen && tsc --noEmit",
     "test": "vitest run",
     "test:e2e": "playwright test",
     "db:generate": "drizzle-kit generate",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "render:sheet": "tsx scripts/render-sheet.ts"
   },
   "dependencies": {
     "better-sqlite3": "^13.0.3",
     "drizzle-orm": "^0.45.4",
+    "fflate": "^0.8.3",
     "lucide-react": "^1.60.0",
     "motion": "^14.4.0",
     "next": "16.4.2",
@@ -25,6 +27,7 @@
     "zod": "^4.6.7"
   },
   "devDependencies": {
+    "@napi-rs/canvas": "^1.0.12",
     "@playwright/test": "^1.64.1",
     "@tailwindcss/turbopack": "^4",
     "@types/better-sqlite3": "^9.6.0",
@@ -36,6 +39,7 @@
     "eslint-config-next": "16.4.2",
     "prettier": "^3.9.10",
     "tailwindcss": "^4",
+    "tsx": "^4.23.15",
     "typescript": "^5",
     "vitest": "^5.0.5"
   },

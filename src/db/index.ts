@@ -5,9 +5,8 @@ import path from "node:path";
 import Database from "better-sqlite3";
 import { drizzle } from "drizzle-orm/better-sqlite3";
 import { migrate } from "drizzle-orm/better-sqlite3/migrator";
+import { dataDir } from "@/lib/paths";
 import * as schema from "./schema";
-
-const dataDir = process.env.FRAMELANE_DATA_DIR ?? path.join(process.cwd(), "data");
 
 function open() {
   fs.mkdirSync(dataDir, { recursive: true });

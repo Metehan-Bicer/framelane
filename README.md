@@ -2,7 +2,7 @@
 
 Design, localize and ship App Store screenshots and metadata from one self-hosted app.
 
-> **Status:** early development. The app shell and data model are in place; the screenshot editor is next.
+> **Status:** early development. The screenshot editor works end to end; metadata and App Store Connect upload are next.
 > Follow the roadmap below or watch the repo for the first release.
 
 ## Why
@@ -18,9 +18,11 @@ App Store Connect with your own API key.
 
 - [x] Apps with bundle ID and languages
 - [x] App Store rules: screenshot sizes, metadata limits, supported locales
-- [ ] Screenshot editor: device frames, backgrounds, captions, layout templates, live preview
-- [ ] Export at the exact pixel sizes App Store Connect accepts
-- [ ] Per-language captions and screenshot sets, optional AI translation with your own key or Ollama
+- [x] Screenshot editor: device frames, backgrounds, captions, layout templates, live preview
+- [x] Export at the exact pixel sizes App Store Connect accepts (iPhone 6.9" and 6.5")
+- [x] Per-language captions and screenshots
+- [ ] iPad sets
+- [ ] Optional AI translation with your own key or Ollama
 - [ ] Metadata editor with character counters, import and export for fastlane and EAS formats
 - [ ] Upload metadata and screenshots to App Store Connect, with a dry run diff first
 
@@ -52,6 +54,7 @@ npm run dev
 | `npm run test:e2e` | End-to-end tests (Playwright, needs `npm run build` first) |
 | `npm run lint` / `npm run typecheck` | ESLint and TypeScript |
 | `npm run db:generate` | Create a migration after changing `src/db/schema.ts` |
+| `npm run render:sheet -- <dir> <out.png>` | Render every template with Node, handy when changing `src/lib/design/render.ts` |
 
 Built with Next.js 16, React 19, Tailwind CSS 4, SQLite and Drizzle.
 
