@@ -1,0 +1,12 @@
+services:
+  framelane:
+    build: .
+    container_name: framelane
+    ports:
+      - "8300:3000"
+    volumes:
+      - framelane-data:/data
+    restart: unless-stopped
+
+volumes:
+  framelane-data:
