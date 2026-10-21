@@ -2,6 +2,11 @@
 
 All notable changes are listed here. The project follows [Semantic Versioning](https://semver.org).
 
+## 0.1.2
+
+- Framelane icon as the favicon and Apple touch icon, replacing the Next.js default.
+- Library footer with the license and author.
+
 ## 0.1.1
 
 - Public demo mode (`FRAMELANE_DEMO=1`): App Store Connect is turned off, a banner links to the quick start, and the
