@@ -44,11 +44,19 @@ export function useShot(fileId: string | undefined): LoadedShot | null {
 
 const fonts = new Map<CaptionFontId, Promise<unknown>>();
 
+/**
+ * Loads the caption font's weights before drawing. Only the primary family is requested:
+ * next/font also declares a fallback face from `local("Arial")`, which does not exist on most
+ * Linux systems and would reject the whole load. A failed weight never blocks drawing; the
+ * canvas then falls back to the next family in the stack.
+ */
 export function loadCaptionFont(font: CaptionFontId) {
   let pending = fonts.get(font);
   if (!pending) {
-    const family = CAPTION_FONT_FAMILIES[font];
-    pending = Promise.all(["500", "600", "800"].map((weight) => document.fonts.load(`${weight} 48px ${family}`)));
+    const primary = CAPTION_FONT_FAMILIES[font].split(",")[0].trim();
+    pending = Promise.allSettled(
+      ["500", "600", "800"].map((weight) => document.fonts.load(`${weight} 48px ${primary}`)),
+    );
     fonts.set(font, pending);
   }
   return pending;
