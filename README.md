@@ -19,6 +19,10 @@ every language, and uploading all of it to App Store Connect. That usually takes
 fastlane. Framelane does the whole flow in one place, runs on your own machine, and talks to App Store Connect with
 your own API key.
 
+<p align="center">
+  <img src="docs/images/demo.gif" alt="Switching templates, palettes and languages, then tidying keywords" width="900" />
+</p>
+
 ## Features
 
 **Screenshots**

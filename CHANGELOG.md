@@ -2,6 +2,13 @@
 
 All notable changes are listed here. The project follows [Semantic Versioning](https://semver.org).
 
+## 0.1.1
+
+- Public demo mode (`FRAMELANE_DEMO=1`): App Store Connect is turned off, a banner links to the quick start, and the
+  data resets to the Daybook demo on start and every night at 03:00.
+- `npm run seed:demo` shares its code with the demo reset.
+- README animation of the editor and metadata flow.
+
 ## 0.1.0
 
 First release.

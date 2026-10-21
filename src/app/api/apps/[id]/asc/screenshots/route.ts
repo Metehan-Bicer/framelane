@@ -4,6 +4,7 @@ import { isAppStoreLocale } from "@/lib/app-store/locales";
 import { getApp } from "@/lib/apps/queries";
 import { ascClient } from "@/lib/asc/connection";
 import { describeError, prepareScreenshotSet } from "@/lib/asc/publish";
+import { DEMO_DISABLED_MESSAGE, isDemo } from "@/lib/demo/mode";
 import { readImageInfo } from "@/lib/files/image-size";
 
 /**
@@ -14,6 +15,7 @@ import { readImageInfo } from "@/lib/files/image-size";
  *   step=order    setId, ids (JSON array) → { uploaded }
  */
 export async function POST(request: Request, ctx: RouteContext<"/api/apps/[id]/asc/screenshots">) {
+  if (isDemo()) return Response.json({ error: DEMO_DISABLED_MESSAGE }, { status: 403 });
   const { id } = await ctx.params;
   const app = await getApp(id);
   const client = ascClient();

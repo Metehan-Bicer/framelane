@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
+import { DemoBanner } from "@/components/demo-banner";
 import { captionFontClasses, geist, geistMono } from "@/lib/fonts";
 import "./globals.css";
 
@@ -16,6 +18,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <body className="min-h-full font-sans">
         {/* Hidden element that keeps caption font faces in the stylesheet for the canvas. */}
         <span className={`${captionFontClasses} hidden`} aria-hidden />
+        <Suspense>
+          <DemoBanner />
+        </Suspense>
         {children}
       </body>
     </html>

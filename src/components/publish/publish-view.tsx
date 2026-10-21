@@ -104,6 +104,16 @@ export function PublishView({ app, design, frames }: Props) {
                 <Loader2 className="size-4 animate-spin" /> Checking App Store Connect…
               </p>
             </Card>
+          ) : !view.connected && view.demo ? (
+            <Card title="Connect App Store Connect">
+              <p className="text-sm leading-relaxed text-ink-2">
+                Publishing is turned off in this public demo, so nobody enters real keys here. Run your own copy to
+                connect an App Store Connect API key:
+              </p>
+              <pre className="mt-3 overflow-x-auto rounded-xl bg-raised px-4 py-3 font-mono text-xs text-ink">
+                docker run -d -p 8300:3000 -v framelane-data:/data ghcr.io/metehan-bicer/framelane
+              </pre>
+            </Card>
           ) : !view.connected ? (
             <Card title="Connect App Store Connect">
               <ConnectForm onConnected={refresh} />

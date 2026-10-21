@@ -12,6 +12,7 @@ import {
 } from "@/lib/asc/connection";
 import { assertValidPrivateKey } from "@/lib/asc/jwt";
 import { applyMetadata, describeError, loadPublishState, type ApplyResult, type PublishState } from "@/lib/asc/publish";
+import { DEMO_DISABLED_MESSAGE, isDemo } from "@/lib/demo/mode";
 import { getListings } from "@/lib/listings/queries";
 
 const credentialsInput = z.object({
@@ -23,6 +24,7 @@ const credentialsInput = z.object({
 export type ConnectResult = { ok: true } | { ok: false; errors: Partial<Record<"issuerId" | "keyId" | "privateKey" | "form", string>> };
 
 export async function connectAsc(input: unknown): Promise<ConnectResult> {
+  if (isDemo()) return { ok: false, errors: { form: DEMO_DISABLED_MESSAGE } };
   const parsed = credentialsInput.safeParse(input);
   if (!parsed.success) {
     return {
@@ -47,7 +49,7 @@ export async function disconnectAsc() {
 }
 
 export type PublishView =
-  | { connected: false }
+  | { connected: false; demo?: boolean }
   | {
       connected: true;
       keyId: string;
@@ -56,6 +58,7 @@ export type PublishView =
     };
 
 export async function loadPublish(appId: string): Promise<PublishView> {
+  if (isDemo()) return { connected: false, demo: true };
   const summary = getAscConnectionSummary();
   const client = ascClient();
   if (!summary || !client) return { connected: false };
@@ -69,6 +72,7 @@ export async function loadPublish(appId: string): Promise<PublishView> {
 }
 
 export async function pushMetadata(appId: string): Promise<{ results: ApplyResult[] } | { error: string }> {
+  if (isDemo()) return { error: DEMO_DISABLED_MESSAGE };
   const client = ascClient();
   const app = await getApp(appId);
   if (!client || !app) return { error: "Connect App Store Connect first" };
