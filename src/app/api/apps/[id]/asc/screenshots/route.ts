@@ -1,13 +1,17 @@
+import { z } from "zod";
 import { DISPLAY_SIZES } from "@/lib/app-store/display-sizes";
 import { isAppStoreLocale } from "@/lib/app-store/locales";
 import { getApp } from "@/lib/apps/queries";
 import { ascClient } from "@/lib/asc/connection";
-import { describeError, replaceScreenshots } from "@/lib/asc/publish";
+import { describeError, prepareScreenshotSet } from "@/lib/asc/publish";
 import { readImageInfo } from "@/lib/files/image-size";
 
 /**
- * Replaces one App Store Connect screenshot set with the PNGs rendered in the browser.
- * The browser renders so uploads match the preview exactly, fonts included.
+ * Replaces one App Store Connect screenshot set with PNGs rendered in the browser, so uploads
+ * match the preview exactly. The browser calls three steps, one request each:
+ *   step=prepare  locale, displayType → { setId, removed }
+ *   step=upload   setId, displayType, file → { id }        (once per screenshot)
+ *   step=order    setId, ids (JSON array) → { uploaded }
  */
 export async function POST(request: Request, ctx: RouteContext<"/api/apps/[id]/asc/screenshots">) {
   const { id } = await ctx.params;
@@ -17,29 +21,40 @@ export async function POST(request: Request, ctx: RouteContext<"/api/apps/[id]/a
   if (!client) return Response.json({ error: "Connect App Store Connect first" }, { status: 400 });
 
   const form = await request.formData();
-  const locale = String(form.get("locale") ?? "");
-  const displayType = String(form.get("displayType") ?? "");
-  const display = DISPLAY_SIZES.find((item) => item.type === displayType);
-  if (!isAppStoreLocale(locale) || !app.locales.includes(locale)) {
-    return Response.json({ error: "Unknown locale" }, { status: 400 });
-  }
-  if (!display) return Response.json({ error: "Unknown display type" }, { status: 400 });
-
-  const files = form.getAll("files").filter((value): value is File => value instanceof File);
-  if (files.length === 0 || files.length > 10) {
-    return Response.json({ error: "Send between 1 and 10 screenshots" }, { status: 400 });
-  }
-  const images = [];
-  for (const file of files) {
-    const bytes = new Uint8Array(await file.arrayBuffer());
-    const info = readImageInfo(bytes);
-    const fits = info && display.sizes.some((size) => size.width === info.width && size.height === info.height);
-    if (!fits) return Response.json({ error: `${file.name} is not a ${display.label} screenshot` }, { status: 400 });
-    images.push({ name: file.name, bytes });
-  }
+  const step = form.get("step");
+  const display = DISPLAY_SIZES.find((item) => item.type === form.get("displayType"));
 
   try {
-    return Response.json(await replaceScreenshots(client, app.bundleId, locale, displayType, images));
+    if (step === "prepare") {
+      const locale = String(form.get("locale") ?? "");
+      if (!isAppStoreLocale(locale) || !app.locales.includes(locale)) {
+        return Response.json({ error: "Unknown locale" }, { status: 400 });
+      }
+      if (!display) return Response.json({ error: "Unknown display type" }, { status: 400 });
+      return Response.json(await prepareScreenshotSet(client, app.bundleId, locale, display.type));
+    }
+
+    const setId = String(form.get("setId") ?? "");
+    if (!setId) return Response.json({ error: "Missing setId" }, { status: 400 });
+
+    if (step === "upload") {
+      const file = form.get("file");
+      if (!(file instanceof File)) return Response.json({ error: "Missing file" }, { status: 400 });
+      if (!display) return Response.json({ error: "Unknown display type" }, { status: 400 });
+      const bytes = new Uint8Array(await file.arrayBuffer());
+      const info = readImageInfo(bytes);
+      const fits = info && display.sizes.some((size) => size.width === info.width && size.height === info.height);
+      if (!fits) return Response.json({ error: `${file.name} is not a ${display.label} screenshot` }, { status: 400 });
+      return Response.json({ id: await client.uploadScreenshot(setId, file.name, bytes) });
+    }
+
+    if (step === "order") {
+      const ids = z.array(z.string()).min(1).max(10).parse(JSON.parse(String(form.get("ids") ?? "[]")));
+      await client.orderScreenshots(setId, ids);
+      return Response.json({ uploaded: ids.length });
+    }
+
+    return Response.json({ error: "Unknown step" }, { status: 400 });
   } catch (error) {
     return Response.json({ error: describeError(error) }, { status: 502 });
   }

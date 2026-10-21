@@ -129,14 +129,11 @@ export async function applyMetadata(
   return results;
 }
 
-/** Replaces one screenshot set with the given images, in order. */
-export async function replaceScreenshots(
-  client: AscClient,
-  bundleId: string,
-  locale: string,
-  displayType: string,
-  images: { name: string; bytes: Uint8Array }[],
-) {
+/**
+ * Replacing a screenshot set takes three steps so that every request carries at most one
+ * full size PNG: prepare the set (removing what is there), upload each image, then order them.
+ */
+export async function prepareScreenshotSet(client: AscClient, bundleId: string, locale: string, displayType: string) {
   const target = await findTarget(client, bundleId);
   if ("status" in target) throw new Error(describeState(target));
   const localizations = await client.versionLocalizations(target.versionId);
@@ -147,13 +144,9 @@ export async function replaceScreenshots(
   const set =
     sets.find((item) => item.attributes.screenshotDisplayType === displayType) ??
     (await client.createScreenshotSet(localization.id, displayType));
-
   const existing = await client.screenshots(set.id);
   for (const screenshot of existing) await client.deleteScreenshot(screenshot.id);
-  const ids: string[] = [];
-  for (const image of images) ids.push(await client.uploadScreenshot(set.id, image.name, image.bytes));
-  await client.orderScreenshots(set.id, ids);
-  return { removed: existing.length, uploaded: ids.length };
+  return { setId: set.id, removed: existing.length };
 }
 
 export function describeState(state: Blocked) {

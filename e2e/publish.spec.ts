@@ -30,6 +30,12 @@ test("connects to App Store Connect and publishes text and screenshots", async (
   await page.waitForTimeout(800);
 
   await page.getByRole("link", { name: "Publish" }).click();
+  // A retry finds the connection the first attempt saved; start from a clean slate.
+  await expect(page.getByText(/^Connect(ed to)? App Store Connect$/).first()).toBeVisible();
+  if (await page.getByText("Connected to App Store Connect").isVisible()) {
+    page.once("dialog", (dialog) => dialog.accept());
+    await page.getByRole("button", { name: "Disconnect" }).click();
+  }
   await expect(page.getByRole("heading", { name: "Connect App Store Connect" })).toBeVisible();
 
   const keyFile = { name: "AuthKey_2X9R4HXF34.p8", mimeType: "application/octet-stream", buffer: Buffer.from(p8) };

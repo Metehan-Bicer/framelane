@@ -49,15 +49,26 @@ export function PublishView({ app, design, frames }: Props) {
       try {
         set({ state: "rendering" });
         const pngs = await renderScreenshotSet({ app, frames, locale, design, display });
-        set({ state: "uploading" });
-        const body = new FormData();
-        body.set("locale", locale);
-        body.set("displayType", display.type);
-        pngs.forEach((png, index) => body.append("files", png, `${String(index + 1).padStart(2, "0")}.png`));
-        const response = await fetch(`/api/apps/${app.id}/asc/screenshots`, { method: "POST", body });
-        const result = await response.json();
-        if (!response.ok) throw new Error(result.error ?? "Upload failed");
-        set({ state: "done", message: `${result.uploaded} uploaded${result.removed ? `, ${result.removed} replaced` : ""}` });
+        const post = async (fields: Record<string, string | Blob>, fileName?: string) => {
+          const body = new FormData();
+          for (const [key, value] of Object.entries(fields)) {
+            if (value instanceof Blob) body.set(key, value, fileName);
+            else body.set(key, value);
+          }
+          const response = await fetch(`/api/apps/${app.id}/asc/screenshots`, { method: "POST", body });
+          const result = await response.json();
+          if (!response.ok) throw new Error(result.error ?? "Upload failed");
+          return result;
+        };
+        const { setId, removed } = await post({ step: "prepare", locale, displayType: display.type });
+        const ids: string[] = [];
+        for (const [index, png] of pngs.entries()) {
+          set({ state: "uploading", message: `${index + 1} of ${pngs.length}` });
+          const name = `${String(index + 1).padStart(2, "0")}.png`;
+          ids.push((await post({ step: "upload", setId, displayType: display.type, file: png }, name)).id);
+        }
+        await post({ step: "order", setId, ids: JSON.stringify(ids) });
+        set({ state: "done", message: `${ids.length} uploaded${removed ? `, ${removed} replaced` : ""}` });
       } catch (error) {
         set({ state: "error", message: error instanceof Error ? error.message : "Upload failed" });
       }
@@ -295,7 +306,7 @@ function UploadBadge({ status }: { status: UploadStatus }) {
   const text = {
     waiting: "Waiting",
     rendering: "Rendering…",
-    uploading: "Uploading…",
+    uploading: status.message ? `Uploading ${status.message}…` : "Uploading…",
     done: status.message ?? "Done",
     error: status.message ?? "Failed",
   }[status.state];
