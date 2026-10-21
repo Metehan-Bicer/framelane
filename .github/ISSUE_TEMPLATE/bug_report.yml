@@ -1,0 +1,35 @@
+name: Bug report
+description: Something does not work as expected
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What did you do, what did you expect, and what happened instead?
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Open an app
+        2. ...
+  - type: input
+    id: version
+    attributes:
+      label: Framelane version
+      placeholder: 0.1.0
+    validations:
+      required: true
+  - type: dropdown
+    id: setup
+    attributes:
+      label: How do you run it
+      options: [Docker image, docker compose from source, npm run dev, Other]
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs or screenshots
+      description: Remove keys, Issuer IDs and anything else private first.

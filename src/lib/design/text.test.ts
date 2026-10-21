@@ -3,10 +3,10 @@ import { parseHighlights, toWords, wrapWords } from "./text";
 
 describe("parseHighlights", () => {
   it("marks words between asterisks", () => {
-    expect(parseHighlights("Focus with a *cat* by your side")).toEqual([
-      { text: "Focus with a ", highlight: false },
-      { text: "cat", highlight: true },
-      { text: " by your side", highlight: false },
+    expect(parseHighlights("Write a *little* every day")).toEqual([
+      { text: "Write a ", highlight: false },
+      { text: "little", highlight: true },
+      { text: " every day", highlight: false },
     ]);
   });
 

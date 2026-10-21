@@ -13,18 +13,19 @@ test("connects to App Store Connect and publishes text and screenshots", async (
   await page.goto("/");
   await page.getByRole("button", { name: "New app" }).first().click();
   const dialog = page.getByRole("dialog", { name: "New app" });
-  await dialog.getByLabel("Name", { exact: true }).fill("Nefo");
-  await dialog.getByLabel("Bundle ID").fill("com.example.nefo");
+  await dialog.getByLabel("Name", { exact: true }).fill("Tidepool");
+  // Unique per attempt, so a retry does not collide with the app the first attempt created.
+  await dialog.getByLabel("Bundle ID").fill(`com.example.tidepool${test.info().retry}`);
   await dialog.getByRole("button", { name: "Create and open editor" }).click();
   await expect(page.getByText("Add your screenshots")).toBeVisible();
 
-  await page.locator('input[type="file"]').first().setInputFiles({ name: "today.png", mimeType: "image/png", buffer: PNG });
+  await page.locator('input[type="file"]').first().setInputFiles({ name: "home.png", mimeType: "image/png", buffer: PNG });
   await expect(page.getByText("Frame 1 of 1")).toBeVisible();
 
   await page.getByRole("link", { name: "Metadata" }).click();
-  await page.getByLabel("App name").fill("Nefo: Quit Smoking");
-  await page.getByLabel("Description", { exact: true }).fill("Count the days since your last cigarette.");
-  await page.getByLabel("Keywords", { exact: true }).fill("quit,smoking");
+  await page.getByLabel("App name").fill("Tidepool: Sleep Sounds");
+  await page.getByLabel("Description", { exact: true }).fill("Ocean sounds that help you fall asleep.");
+  await page.getByLabel("Keywords", { exact: true }).fill("sleep,sounds");
   await expect(page.getByText("Saved").filter({ visible: true })).toBeVisible();
   await page.waitForTimeout(800);
 
@@ -55,13 +56,16 @@ test("connects to App Store Connect and publishes text and screenshots", async (
   await expect(page.getByRole("button", { name: "Up to date" })).toBeVisible();
 
   await page.getByRole("button", { name: "Upload" }).click();
-  await expect(page.getByText("1 uploaded")).toBeVisible({ timeout: 15_000 });
+  // Rendering a full size frame is slow on CI runners; on failure the row shows the actual error.
+  const row = page.getByRole("listitem").filter({ hasText: "English (U.S.)" }).filter({ visible: true });
+  await expect(row).not.toContainText(/Waiting|Rendering|Uploading/, { timeout: 60_000 });
+  await expect(row).toContainText("1 uploaded");
 
   const state = await (await request.get(`${FAKE_ASC}/__state`)).json();
   const versionLoc = Object.values(state.versionLocs)[0] as { attributes: Record<string, string> };
-  expect(versionLoc.attributes).toMatchObject({ locale: "en-US", keywords: "quit,smoking" });
+  expect(versionLoc.attributes).toMatchObject({ locale: "en-US", keywords: "sleep,sounds" });
   const infoLoc = Object.values(state.infoLocs)[0] as { attributes: Record<string, string> };
-  expect(infoLoc.attributes.name).toBe("Nefo: Quit Smoking");
+  expect(infoLoc.attributes.name).toBe("Tidepool: Sleep Sounds");
   const set = Object.values(state.sets)[0] as { attributes: { screenshotDisplayType: string }; order: string[] };
   expect(set.attributes.screenshotDisplayType).toBe("APP_IPHONE_67");
   expect(set.order).toHaveLength(1);

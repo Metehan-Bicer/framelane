@@ -66,10 +66,10 @@ function NewAppDialog({ ref }: { ref: React.RefObject<HTMLDialogElement | null> 
           </button>
         </div>
         <Field label="Name" error={state.errors?.name}>
-          <input name="name" placeholder="Odaq" maxLength={30} required autoFocus className={inputClass} />
+          <input name="name" placeholder="Daybook" maxLength={30} required autoFocus className={inputClass} />
         </Field>
         <Field label="Bundle ID" error={state.errors?.bundleId}>
-          <input name="bundleId" placeholder="com.example.odaq" required className={`${inputClass} font-mono`} />
+          <input name="bundleId" placeholder="com.example.daybook" required className={`${inputClass} font-mono`} />
         </Field>
         <Field label="Primary language" error={state.errors?.primaryLocale}>
           <select name="primaryLocale" defaultValue="en-US" className={inputClass}>

@@ -5,3 +5,5 @@ data
 test-results
 playwright-report
 *.tsbuildinfo
+demo
+docs

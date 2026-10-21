@@ -12,7 +12,9 @@
     "test:e2e": "playwright test",
     "db:generate": "drizzle-kit generate",
     "format": "prettier --write .",
-    "render:sheet": "tsx scripts/render-sheet.ts"
+    "render:sheet": "tsx scripts/render-sheet.ts",
+    "seed:demo": "tsx scripts/seed-demo.ts",
+    "demo:screens": "node scripts/demo-screens.mjs"
   },
   "dependencies": {
     "better-sqlite3": "^13.0.3",

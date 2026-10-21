@@ -35,7 +35,7 @@ export function Inspector(props: Props) {
               label="Badge"
               value={caption.badge}
               max={40}
-              placeholder={locale !== primaryLocale ? primary?.badge : "Pomodoro with a cat"}
+              placeholder={locale !== primaryLocale ? primary?.badge : "Daily prompts"}
               onChange={(badge) => props.onCaption(frame.id, { badge })}
             />
             <TextField
@@ -43,7 +43,7 @@ export function Inspector(props: Props) {
               value={caption.title}
               max={80}
               multiline
-              placeholder={locale !== primaryLocale ? primary?.title : "Focus with a *cat* by your side"}
+              placeholder={locale !== primaryLocale ? primary?.title : "Write a little, *every day*"}
               hint="Wrap words in *asterisks* to highlight them"
               onChange={(title) => props.onCaption(frame.id, { title })}
             />

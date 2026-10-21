@@ -1,0 +1,20 @@
+name: Feature request
+description: Suggest an idea or a missing App Store Connect feature
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: The problem
+      description: What are you trying to do, and what gets in the way today?
+    validations:
+      required: true
+  - type: textarea
+    id: idea
+    attributes:
+      label: What you would like
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: What you use today
+      description: fastlane, a design tool, a spreadsheet, something else?

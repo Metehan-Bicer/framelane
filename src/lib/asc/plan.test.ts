@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { EMPTY_LISTING } from "@/lib/app-store/listing";
 import { hasChanges, planMetadata } from "./plan";
 
-const listing = { ...EMPTY_LISTING, name: "Odaq", keywords: "focus,timer", description: "A calm timer." };
+const listing = { ...EMPTY_LISTING, name: "Daybook", keywords: "journal,diary", description: "A daily journal." };
 
 describe("planMetadata", () => {
   it("updates only the fields that differ", () => {
@@ -11,8 +11,8 @@ describe("planMetadata", () => {
       [
         {
           locale: "en-US",
-          version: { id: "v1", fields: { description: "A calm timer.", keywords: "focus" } },
-          info: { id: "i1", fields: { name: "Odaq" } },
+          version: { id: "v1", fields: { description: "A daily journal.", keywords: "journal" } },
+          info: { id: "i1", fields: { name: "Daybook" } },
         },
       ],
       { infoEditable: true },
@@ -20,7 +20,7 @@ describe("planMetadata", () => {
     expect(plan[0].version).toEqual({
       action: "update",
       id: "v1",
-      changes: [{ field: "keywords", from: "focus", to: "focus,timer" }],
+      changes: [{ field: "keywords", from: "journal", to: "journal,diary" }],
     });
     expect(plan[0].info).toEqual({ action: "none", id: "i1", changes: [] });
     expect(hasChanges(plan)).toBe(true);

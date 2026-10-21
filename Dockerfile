@@ -15,6 +15,9 @@ RUN npm run build
 
 FROM node:22-alpine AS run
 WORKDIR /app
+LABEL org.opencontainers.image.source="https://github.com/Metehan-Bicer/framelane" \
+      org.opencontainers.image.description="Design, localize and ship App Store screenshots and metadata" \
+      org.opencontainers.image.licenses="MIT"
 ENV NODE_ENV=production NEXT_TELEMETRY_DISABLED=1 PORT=3000 HOSTNAME=0.0.0.0 \
     FRAMELANE_DATA_DIR=/data
 RUN addgroup -S app && adduser -S app -G app && mkdir /data && chown app:app /data

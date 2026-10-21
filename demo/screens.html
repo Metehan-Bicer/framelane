@@ -1,0 +1,99 @@
+<!doctype html>
+<!--
+  Mock screens for the Daybook demo app, rendered to PNG by scripts/demo-screens.mjs.
+  Daybook is fictional; it only exists to show Framelane with neutral content.
+  Open with ?screen=today&lang=en to preview one screen.
+-->
+<html>
+<head>
+<meta charset="utf-8" />
+<style>
+  @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,600&display=swap");
+  * { margin: 0; box-sizing: border-box; }
+  :root { --bg: #fbf7f1; --card: #fff; --ink: #2a2118; --muted: #8b7d6e; --line: #efe6da; --accent: #e46b3b; --soft: #fde9dd; --green: #4f9a6c; }
+  body { width: 440px; height: 956px; background: var(--bg); font-family: Inter, sans-serif; color: var(--ink); overflow: hidden; }
+  .status { height: 62px; padding: 22px 30px 0 34px; display: flex; justify-content: space-between; font-weight: 600; font-size: 16px; }
+  .status i { font-style: normal; letter-spacing: 2px; font-size: 13px; }
+  .screen { padding: 8px 22px 0; }
+  h1 { font-family: Fraunces, serif; font-weight: 600; font-size: 34px; letter-spacing: -0.02em; }
+  .muted { color: var(--muted); }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 22px; padding: 18px; margin-top: 14px; box-shadow: 0 6px 20px -12px rgba(80,50,20,.25); }
+  .row { display: flex; align-items: center; gap: 10px; }
+  .chip { padding: 6px 12px; border-radius: 999px; background: var(--soft); color: var(--accent); font-size: 13px; font-weight: 600; }
+  .moods { display: flex; justify-content: space-between; margin-top: 12px; }
+  .moods span { width: 54px; height: 54px; border-radius: 16px; background: #f5efe7; display: grid; place-items: center; font-size: 26px; }
+  .moods span.on { background: var(--soft); outline: 2px solid var(--accent); }
+  .tabbar { position: absolute; bottom: 26px; left: 22px; right: 22px; height: 70px; border-radius: 26px; background: #fff; border: 1px solid var(--line);
+    display: flex; justify-content: space-around; align-items: center; font-size: 11px; font-weight: 600; color: var(--muted); box-shadow: 0 10px 30px -12px rgba(80,50,20,.3); }
+  .tabbar div { display: grid; justify-items: center; gap: 4px; }
+  .tabbar b { width: 22px; height: 22px; border-radius: 7px; background: #eadfd2; }
+  .tabbar .on { color: var(--accent); } .tabbar .on b { background: var(--accent); }
+  .fab { position: absolute; right: 30px; bottom: 116px; width: 62px; height: 62px; border-radius: 22px; background: var(--accent); color: #fff; font-size: 34px; display: grid; place-items: center; box-shadow: 0 12px 24px -8px rgba(228,107,59,.6); }
+  .entry-title { font-family: Fraunces, serif; font-size: 22px; font-weight: 600; }
+  .photo { height: 210px; border-radius: 18px; margin-top: 14px; background: linear-gradient(160deg, #f6c59a, #e9845a 55%, #8e4a3a); position: relative; overflow: hidden; }
+  .photo::after { content: ""; position: absolute; left: -40px; right: -40px; bottom: -60px; height: 140px; border-radius: 50%; background: #5e3a2c; opacity: .55; }
+  .body { font-size: 16px; line-height: 1.6; margin-top: 14px; color: #4a3d30; }
+  .grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; margin-top: 12px; text-align: center; font-size: 13px; }
+  .grid .d { height: 44px; border-radius: 12px; display: grid; place-items: center; background: #f5efe7; font-weight: 600; color: #6d5f50; }
+  .grid .w { background: var(--soft); color: var(--accent); }
+  .grid .t { background: var(--accent); color: #fff; }
+  .big { font-family: Fraunces, serif; font-size: 52px; font-weight: 600; color: var(--accent); line-height: 1; }
+  .bars { display: flex; align-items: flex-end; gap: 10px; height: 150px; margin-top: 16px; }
+  .bars div { flex: 1; border-radius: 10px 10px 4px 4px; background: linear-gradient(#f3a47e, var(--accent)); }
+  .legend { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); margin-top: 8px; }
+  .widget { border-radius: 26px; padding: 18px; color: #fff; background: linear-gradient(150deg, #e9845a, #b8502e); }
+</style>
+</head>
+<body>
+<div class="status"><span>9:41</span><i>▂▄▆ ◉ ▭</i></div>
+<div class="screen" id="root"></div>
+<script>
+const params = new URLSearchParams(location.search);
+const lang = params.get("lang") ?? "en";
+const t = (en, tr) => (lang === "tr" ? tr : en);
+const tabs = (on) => `<div class="tabbar">${[t("Today","Bugün"),t("Journal","Günlük"),t("Calendar","Takvim"),t("Insights","Analiz")]
+  .map((label, i) => `<div class="${i === on ? "on" : ""}"><b></b>${label}</div>`).join("")}</div>`;
+const screens = {
+  today: () => `
+    <p class="muted" style="font-weight:600">${t("Tuesday, October 21","21 Ekim, Salı")}</p>
+    <h1>${t("Good morning, Sam","Günaydın, Deniz")}</h1>
+    <div class="card"><div class="row"><span class="chip">${t("Today's prompt","Günün sorusu")}</span></div>
+      <p class="entry-title" style="margin-top:12px">${t("What made you smile yesterday?","Dün seni ne gülümsetti?")}</p>
+      <p class="muted" style="margin-top:8px;font-size:14px">${t("Two minutes is enough. Start with one sentence.","İki dakika yeter. Tek bir cümleyle başla.")}</p></div>
+    <div class="card"><p style="font-weight:600">${t("How do you feel?","Nasıl hissediyorsun?")}</p>
+      <div class="moods"><span>😔</span><span>😐</span><span>🙂</span><span class="on">😊</span><span>🤩</span></div></div>
+    <div class="card row" style="justify-content:space-between"><div><p class="muted" style="font-size:13px;font-weight:600">${t("Writing streak","Yazma serisi")}</p>
+      <p class="big" style="font-size:40px">21 ${t("days","gün")}</p></div><span class="chip" style="background:#e3f1e8;color:var(--green)">${t("Best ever","En iyisi")}</span></div>
+    <div class="fab">+</div>${tabs(0)}`,
+  entry: () => `
+    <p class="muted" style="font-weight:600">${t("Saturday · Sunny, 18°","Cumartesi · Güneşli, 18°")}</p>
+    <h1 style="font-size:30px;margin-top:4px">${t("Sunset at the pier","İskelede gün batımı")}</h1>
+    <div class="photo"></div>
+    <p class="body">${t("We walked to the end of the pier and waited for the light to go orange. Nobody talked for a while. I want more evenings like this one, slow and close.",
+      "İskelenin ucuna kadar yürüdük ve ışığın turuncuya dönmesini bekledik. Bir süre kimse konuşmadı. Böyle yavaş ve yakın akşamlardan daha çok istiyorum.")}</p>
+    <div class="row" style="margin-top:16px"><span class="chip">#${t("family","aile")}</span><span class="chip">#${t("outside","dışarıda")}</span><span class="chip" style="background:#e3f1e8;color:var(--green)">😊 ${t("Happy","Mutlu")}</span></div>
+    ${tabs(1)}`,
+  calendar: () => `
+    <h1>${t("October","Ekim")}</h1>
+    <p class="muted" style="margin-top:4px">${t("18 entries this month","Bu ay 18 kayıt")}</p>
+    <div class="card"><div class="grid">${t("MTWTFSS","PSÇPCCP").split("").map((d) => `<span class="muted" style="font-weight:600">${d}</span>`).join("")}
+      ${Array.from({length: 31}, (_, i) => { const day = i + 1; const cls = day === 21 ? "t" : [1,2,3,5,6,8,9,10,12,13,14,15,16,17,18,19,20].includes(day) ? "w" : ""; return `<div class="d ${cls}">${day}</div>`; }).join("")}</div></div>
+    <div class="card row" style="justify-content:space-between"><div><p class="muted" style="font-size:13px;font-weight:600">${t("Longest streak","En uzun seri")}</p><p class="big" style="font-size:36px">21</p></div>
+      <div style="text-align:right"><p class="muted" style="font-size:13px;font-weight:600">${t("Words written","Yazılan kelime")}</p><p class="big" style="font-size:36px;color:var(--ink)">6,240</p></div></div>
+    ${tabs(2)}`,
+  insights: () => `
+    <h1>${t("Insights","Analiz")}</h1>
+    <p class="muted" style="margin-top:4px">${t("Your last 7 days","Son 7 günün")}</p>
+    <div class="card"><p style="font-weight:600">${t("Mood","Ruh hali")}</p>
+      <div class="bars">${[48,62,55,80,70,92,86].map((h) => `<div style="height:${h}%"></div>`).join("")}</div>
+      <div class="legend">${t("Mon Tue Wed Thu Fri Sat Sun","Pzt Sal Çar Per Cum Cmt Paz").split(" ").map((d) => `<span>${d}</span>`).join("")}</div></div>
+    <div class="card"><p style="font-weight:600">${t("You feel best after","En iyi hissettiğin anlar")}</p>
+      <div class="row" style="margin-top:12px;flex-wrap:wrap"><span class="chip">🌳 ${t("Walks","Yürüyüş")}</span><span class="chip">☕ ${t("Friends","Arkadaşlar")}</span><span class="chip">📚 ${t("Reading","Okuma")}</span></div></div>
+    <div class="widget" style="margin-top:14px"><p style="font-size:13px;font-weight:600;opacity:.85">${t("Home Screen widget","Ana ekran widget'ı")}</p>
+      <p style="font-family:Fraunces,serif;font-size:24px;margin-top:6px">${t("21 days. Keep the streak alive.","21 gün. Seriyi koru.")}</p></div>
+    ${tabs(3)}`,
+};
+document.getElementById("root").innerHTML = (screens[params.get("screen")] ?? screens.today)();
+</script>
+</body>
+</html>

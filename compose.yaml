@@ -1,5 +1,6 @@
 services:
   framelane:
+    image: ghcr.io/metehan-bicer/framelane:latest
     build: .
     container_name: framelane
     ports:

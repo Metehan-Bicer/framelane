@@ -12,8 +12,8 @@ test("creates an app, adds a screenshot and captions it", async ({ page }) => {
 
   await page.getByRole("button", { name: "New app" }).first().click();
   const dialog = page.getByRole("dialog", { name: "New app" });
-  await dialog.getByLabel("Name", { exact: true }).fill("Odaq");
-  await dialog.getByLabel("Bundle ID").fill("com.example.odaq");
+  await dialog.getByLabel("Name", { exact: true }).fill("Daybook");
+  await dialog.getByLabel("Bundle ID").fill("com.example.daybook");
   await dialog.getByRole("button", { name: "Create and open editor" }).click();
 
   await expect(page).toHaveURL(/\/apps\//);
@@ -27,22 +27,22 @@ test("creates an app, adds a screenshot and captions it", async ({ page }) => {
   await expect(page.getByRole("status")).toHaveText("1 frame added");
   await expect(page.getByText("Frame 1 of 1")).toBeVisible();
 
-  await page.getByLabel("Title", { exact: true }).fill("Focus with a *cat*");
+  await page.getByLabel("Title", { exact: true }).fill("Write a *little*");
   await expect(page.getByText("Saved")).toBeVisible();
 
   await page.reload();
-  await expect(page.getByLabel("Title", { exact: true })).toHaveValue("Focus with a *cat*");
+  await expect(page.getByLabel("Title", { exact: true })).toHaveValue("Write a *little*");
 
   await page.goto("/");
-  await expect(page.getByRole("list", { name: "Apps" }).getByText("Odaq", { exact: true })).toBeVisible();
+  await expect(page.getByRole("list", { name: "Apps" }).getByText("Daybook", { exact: true })).toBeVisible();
 });
 
 test("shows validation errors", async ({ page }) => {
   await page.goto("/");
   await page.getByRole("button", { name: "New app" }).first().click();
   const dialog = page.getByRole("dialog", { name: "New app" });
-  await dialog.getByLabel("Name", { exact: true }).fill("Nefo");
-  await dialog.getByLabel("Bundle ID").fill("nefo");
+  await dialog.getByLabel("Name", { exact: true }).fill("Tidepool");
+  await dialog.getByLabel("Bundle ID").fill("tidepool");
   await dialog.getByRole("button", { name: "Create and open editor" }).click();
   await expect(dialog.getByText("Use reverse DNS, like com.example.app")).toBeVisible();
 });
@@ -51,8 +51,8 @@ test("edits metadata and imports an EAS store config", async ({ page }) => {
   await page.goto("/");
   await page.getByRole("button", { name: "New app" }).first().click();
   const dialog = page.getByRole("dialog", { name: "New app" });
-  await dialog.getByLabel("Name", { exact: true }).fill("Kertik");
-  await dialog.getByLabel("Bundle ID").fill("com.example.kertik");
+  await dialog.getByLabel("Name", { exact: true }).fill("Tally");
+  await dialog.getByLabel("Bundle ID").fill("com.example.tally");
   await dialog.getByRole("button", { name: "Create and open editor" }).click();
   await expect(page).toHaveURL(/\/apps\/[^/]+$/);
 
@@ -68,8 +68,8 @@ test("edits metadata and imports an EAS store config", async ({ page }) => {
     configVersion: 0,
     apple: {
       info: {
-        "en-US": { title: "Kertik: Habit Tracker", keywords: ["habit", "tally"] },
-        tr: { title: "Kertik: Alışkanlık Takibi", subtitle: "Çentik at, seriyi koru" },
+        "en-US": { title: "Tally: Habit Tracker", keywords: ["habit", "tally"] },
+        tr: { title: "Tally: Alışkanlık Takibi", subtitle: "Her gün bir çizgi" },
         xx: { title: "Unknown" },
       },
     },
@@ -80,12 +80,12 @@ test("edits metadata and imports an EAS store config", async ({ page }) => {
     buffer: Buffer.from(JSON.stringify(config)),
   });
   await expect(page.getByRole("status")).toHaveText("Imported 2 languages, skipped xx");
-  await expect(page.getByLabel("App name")).toHaveValue("Kertik: Habit Tracker");
+  await expect(page.getByLabel("App name")).toHaveValue("Tally: Habit Tracker");
 
   await page.getByRole("button", { name: "Turkish" }).click();
-  await expect(page.getByLabel("Subtitle")).toHaveValue("Çentik at, seriyi koru");
+  await expect(page.getByLabel("Subtitle")).toHaveValue("Her gün bir çizgi");
 
   await page.reload();
   await page.getByRole("button", { name: "Turkish" }).click();
-  await expect(page.getByLabel("App name")).toHaveValue("Kertik: Alışkanlık Takibi");
+  await expect(page.getByLabel("App name")).toHaveValue("Tally: Alışkanlık Takibi");
 });

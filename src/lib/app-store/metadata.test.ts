@@ -3,7 +3,7 @@ import { countCharacters, normalizeKeywords, validateMetadata } from "./metadata
 
 describe("countCharacters", () => {
   it("counts emoji and combined letters once", () => {
-    expect(countCharacters("Odaq 🍅")).toBe(6);
+    expect(countCharacters("Daybook 📓")).toBe(9);
     expect(countCharacters("👨‍👩‍👧")).toBe(1);
     expect(countCharacters("ışığı")).toBe(5);
   });
@@ -11,7 +11,7 @@ describe("countCharacters", () => {
 
 describe("validateMetadata", () => {
   it("accepts values within limits", () => {
-    expect(validateMetadata({ name: "Odaq", subtitle: "Focus timer" })).toEqual([]);
+    expect(validateMetadata({ name: "Daybook", subtitle: "Daily journal" })).toEqual([]);
   });
 
   it("reports fields over the limit", () => {
@@ -23,6 +23,6 @@ describe("validateMetadata", () => {
 
 describe("normalizeKeywords", () => {
   it("trims spaces, drops empty entries and duplicates", () => {
-    expect(normalizeKeywords(" focus, pomodoro ,, Focus,timer ")).toBe("focus,pomodoro,timer");
+    expect(normalizeKeywords(" journal, mood ,, Journal,diary ")).toBe("journal,mood,diary");
   });
 });
