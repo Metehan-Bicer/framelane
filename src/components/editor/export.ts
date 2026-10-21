@@ -7,6 +7,7 @@ import { renderFrame } from "@/lib/design/render";
 import { loadCaptionFont, loadShot } from "@/lib/design/client-assets";
 import { CAPTION_FONT_FAMILIES } from "@/lib/fonts";
 import { captionFor, shotFor, type EditorApp, type EditorFrame } from "./types";
+import { slug } from "@/lib/slug";
 
 type ExportInput = {
   app: EditorApp;
@@ -63,8 +64,4 @@ export async function exportScreenshots({ app, frames, locales, design, display,
   link.download = `${slug(app.name)}-${display.type.toLowerCase()}.zip`;
   link.click();
   setTimeout(() => URL.revokeObjectURL(url), 10_000);
-}
-
-function slug(value: string) {
-  return value.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "framelane";
 }

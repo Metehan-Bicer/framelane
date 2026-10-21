@@ -15,6 +15,13 @@
       "when": 1792532613527,
       "tag": "0001_frames",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1792573782322,
+      "tag": "0002_listings",
+      "breakpoints": true
     }
   ]
 }

@@ -10,7 +10,7 @@ import { exportScreenshots } from "./export";
 import { Filmstrip } from "./filmstrip";
 import { Inspector } from "./inspector";
 import { TemplateRail } from "./template-rail";
-import { Topbar } from "./topbar";
+import { DisplaySwitch, PrimaryButton, Topbar } from "./topbar";
 import { captionFor, EXPORTABLE_DISPLAYS, shotFor, type EditorApp, type EditorFrame } from "./types";
 import { useAutosave } from "./use-autosave";
 
@@ -180,16 +180,22 @@ export function Editor({ app, initialDesign, initialFrames }: Props) {
     >
       <Topbar
         app={app}
+        section="screenshots"
         locales={locales}
         locale={locale}
         onLocale={setLocale}
         onAddLocale={addLocale}
-        displayType={displayType}
-        onDisplay={setDisplayType}
         status={status}
-        exportProgress={exportProgress}
-        onExport={startExport}
-      />
+      >
+        <DisplaySwitch value={displayType} onChange={setDisplayType} />
+        <PrimaryButton
+          onClick={startExport}
+          disabled={exportProgress !== null}
+          progress={exportProgress ? exportProgress.done / exportProgress.total : null}
+        >
+          {exportProgress ? `${exportProgress.done}/${exportProgress.total}` : "Export"}
+        </PrimaryButton>
+      </Topbar>
 
       <div className="flex min-h-0 flex-1 gap-3 p-3">
         <TemplateRail

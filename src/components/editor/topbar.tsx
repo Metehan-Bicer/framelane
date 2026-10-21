@@ -12,23 +12,26 @@ import type { SaveStatus } from "./use-autosave";
 
 type Props = {
   app: EditorApp;
+  section: "screenshots" | "metadata";
   locales: string[];
   locale: string;
   onLocale: (code: string) => void;
   onAddLocale: (code: string) => void;
-  displayType: DisplayType;
-  onDisplay: (type: DisplayType) => void;
   status: SaveStatus;
-  exportProgress: { done: number; total: number } | null;
-  onExport: () => void;
+  /** Section specific controls, shown before the save status. */
+  children?: React.ReactNode;
 };
 
-export function Topbar(props: Props) {
-  const { app, locales, locale, onLocale, displayType, onDisplay, status, exportProgress, onExport } = props;
+const SECTIONS = [
+  { id: "screenshots", label: "Screenshots", href: (id: string) => `/apps/${id}` },
+  { id: "metadata", label: "Metadata", href: (id: string) => `/apps/${id}/metadata` },
+] as const;
 
+/** Header shared by every app section: identity, section tabs, languages and save state. */
+export function Topbar({ app, section, locales, locale, onLocale, onAddLocale, status, children }: Props) {
   return (
     <header className="flex h-14 shrink-0 items-center gap-4 border-b border-line bg-panel px-3">
-      <div className="flex w-[240px] items-center gap-2">
+      <div className="flex items-center gap-2">
         <Link
           href="/"
           aria-label="Back to apps"
@@ -37,73 +40,101 @@ export function Topbar(props: Props) {
           <ArrowLeft className="size-4" />
         </Link>
         <FrameMark className="size-7" />
-        <div className="min-w-0 leading-tight">
+        <div className="w-36 min-w-0 leading-tight">
           <p className="truncate text-sm font-medium">{app.name}</p>
           <p className="truncate font-mono text-[10px] text-ink-3">{app.bundleId}</p>
         </div>
+        <nav aria-label="Sections" className="ml-2 flex items-center gap-1">
+          {SECTIONS.map((item) => (
+            <Link
+              key={item.id}
+              href={item.href(app.id)}
+              aria-current={item.id === section ? "page" : undefined}
+              className="rounded-lg px-3 py-1.5 text-sm text-ink-3 transition hover:bg-hover hover:text-ink aria-[current=page]:bg-accent-soft aria-[current=page]:font-medium aria-[current=page]:text-accent"
+            >
+              {item.label}
+            </Link>
+          ))}
+        </nav>
       </div>
 
       <nav aria-label="Languages" className="flex min-w-0 flex-1 items-center justify-center gap-1">
-        <div className="flex items-center gap-0.5 rounded-xl bg-raised p-1">
-        {locales.map((code) => (
-          <button
-            key={code}
-            onClick={() => onLocale(code)}
-            className="relative rounded-lg px-3 py-1.5 text-xs font-medium text-ink-3 transition hover:text-ink aria-pressed:text-ink"
-            aria-pressed={code === locale}
-            title={APP_STORE_LOCALES[code as keyof typeof APP_STORE_LOCALES] ?? code}
-          >
-            {code === locale && (
-              <motion.span
-                layoutId="locale-pill"
-                className="absolute inset-0 rounded-lg bg-panel shadow-soft"
-                transition={{ type: "spring", stiffness: 500, damping: 38 }}
-              />
-            )}
-            <span className="relative">{code}</span>
-            {code === app.primaryLocale && <span className="relative ml-1 text-ink-3">·</span>}
-          </button>
-        ))}
-        </div>
-        <AddLocale existing={locales} onAdd={props.onAddLocale} />
-      </nav>
-
-      <div className="flex items-center gap-3">
-        <div className="flex gap-0.5 rounded-xl bg-raised p-1" role="radiogroup" aria-label="Display size">
-          {EXPORTABLE_DISPLAYS.map((display) => (
+        <div className="scrollbar-none flex min-w-0 items-center gap-0.5 overflow-x-auto rounded-xl bg-raised p-1">
+          {locales.map((code) => (
             <button
-              key={display.type}
-              role="radio"
-              aria-checked={display.type === displayType}
-              onClick={() => onDisplay(display.type)}
-              className="rounded-lg px-2.5 py-1 text-xs font-medium text-ink-3 transition aria-checked:bg-panel aria-checked:text-ink aria-checked:shadow-soft"
-              title={`${display.sizes[0].width} × ${display.sizes[0].height}`}
+              key={code}
+              onClick={() => onLocale(code)}
+              className="relative shrink-0 rounded-lg px-3 py-1.5 text-xs font-medium text-ink-3 transition hover:text-ink aria-pressed:text-ink"
+              aria-pressed={code === locale}
+              title={APP_STORE_LOCALES[code as keyof typeof APP_STORE_LOCALES] ?? code}
             >
-              {display.label.replace("iPhone ", "")}
+              {code === locale && (
+                <motion.span
+                  layoutId="locale-pill"
+                  className="absolute inset-0 rounded-lg bg-panel shadow-soft"
+                  transition={{ type: "spring", stiffness: 500, damping: 38 }}
+                />
+              )}
+              <span className="relative">{code}</span>
+              {code === app.primaryLocale && <span className="relative ml-1 text-ink-3">·</span>}
             </button>
           ))}
         </div>
+        <AddLocale existing={locales} onAdd={onAddLocale} />
+      </nav>
 
+      <div className="flex items-center gap-3">
+        {children}
         <SaveIndicator status={status} />
-
-        <button
-          onClick={onExport}
-          disabled={exportProgress !== null}
-          className="relative flex h-9 items-center gap-2 overflow-hidden rounded-lg bg-accent px-3.5 text-sm font-medium text-accent-ink shadow-soft transition hover:brightness-105 disabled:cursor-progress"
-        >
-          {exportProgress && (
-            <span
-              className="absolute inset-y-0 left-0 bg-white/25 transition-[width]"
-              style={{ width: `${(exportProgress.done / exportProgress.total) * 100}%` }}
-            />
-          )}
-          <Download className="relative size-4" />
-          <span className="relative tabular-nums">
-            {exportProgress ? `${exportProgress.done}/${exportProgress.total}` : "Export"}
-          </span>
-        </button>
       </div>
     </header>
+  );
+}
+
+export function DisplaySwitch({ value, onChange }: { value: DisplayType; onChange: (type: DisplayType) => void }) {
+  return (
+    <div className="flex gap-0.5 rounded-xl bg-raised p-1" role="radiogroup" aria-label="Display size">
+      {EXPORTABLE_DISPLAYS.map((display) => (
+        <button
+          key={display.type}
+          role="radio"
+          aria-checked={display.type === value}
+          onClick={() => onChange(display.type)}
+          className="rounded-lg px-2.5 py-1 text-xs font-medium text-ink-3 transition aria-checked:bg-panel aria-checked:text-ink aria-checked:shadow-soft"
+          title={`${display.sizes[0].width} × ${display.sizes[0].height}`}
+        >
+          {display.label.replace("iPhone ", "")}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+export function PrimaryButton({
+  onClick,
+  disabled,
+  progress,
+  icon: Icon = Download,
+  children,
+}: {
+  onClick: () => void;
+  disabled?: boolean;
+  progress?: number | null;
+  icon?: typeof Download;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      disabled={disabled}
+      className="relative flex h-9 items-center gap-2 overflow-hidden rounded-lg bg-accent px-3.5 text-sm font-medium text-accent-ink shadow-soft transition hover:brightness-105 disabled:cursor-progress"
+    >
+      {progress != null && (
+        <span className="absolute inset-y-0 left-0 bg-white/25 transition-[width]" style={{ width: `${progress * 100}%` }} />
+      )}
+      <Icon className="relative size-4" />
+      <span className="relative tabular-nums">{children}</span>
+    </button>
   );
 }
 

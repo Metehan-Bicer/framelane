@@ -2,7 +2,7 @@
 
 Design, localize and ship App Store screenshots and metadata from one self-hosted app.
 
-> **Status:** early development. The screenshot editor works end to end; metadata and App Store Connect upload are next.
+> **Status:** early development. Screenshots and metadata work end to end; App Store Connect upload is next.
 > Follow the roadmap below or watch the repo for the first release.
 
 ## Why
@@ -23,7 +23,8 @@ App Store Connect with your own API key.
 - [x] Per-language captions and screenshots
 - [ ] iPad sets
 - [ ] Optional AI translation with your own key or Ollama
-- [ ] Metadata editor with character counters, import and export for fastlane and EAS formats
+- [x] Metadata editor with character counters, keyword tidying and a product page preview
+- [x] Import and export for fastlane `metadata/` folders and EAS `store.config.json`
 - [ ] Upload metadata and screenshots to App Store Connect, with a dry run diff first
 
 **Later:** keyword suggestions, Google Play, shared templates, CLI and MCP server.

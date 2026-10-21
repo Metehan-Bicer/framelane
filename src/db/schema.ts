@@ -1,5 +1,6 @@
 import { sql } from "drizzle-orm";
-import { index, integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
+import { index, integer, primaryKey, sqliteTable, text } from "drizzle-orm/sqlite-core";
+import type { Listing } from "@/lib/app-store/listing";
 import type { Caption, Design } from "@/lib/design/model";
 
 export const apps = sqliteTable("apps", {
@@ -42,6 +43,22 @@ export const frames = sqliteTable(
     shots: text("shots", { mode: "json" }).$type<Record<string, string>>().notNull().default({}),
   },
   (table) => [index("frames_app_position").on(table.appId, table.position)],
+);
+
+/** Product page text for one language, as App Store Connect stores it. */
+export const listings = sqliteTable(
+  "listings",
+  {
+    appId: text("app_id")
+      .notNull()
+      .references(() => apps.id, { onDelete: "cascade" }),
+    locale: text("locale").notNull(),
+    fields: text("fields", { mode: "json" }).$type<Partial<Listing>>().notNull().default({}),
+    updatedAt: integer("updated_at", { mode: "timestamp" })
+      .notNull()
+      .default(sql`(unixepoch())`),
+  },
+  (table) => [primaryKey({ columns: [table.appId, table.locale] })],
 );
 
 export type App = typeof apps.$inferSelect;
