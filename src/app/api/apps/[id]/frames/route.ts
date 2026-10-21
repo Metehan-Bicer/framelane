@@ -1,5 +1,5 @@
 import { eq } from "drizzle-orm";
-import { getDb } from "@/db";
+import { currentDb } from "@/db";
 import { apps } from "@/db/schema";
 import { storeScreenshot, UploadError } from "@/lib/files/storage";
 import { createFrame, setFrameShot } from "@/lib/frames/queries";
@@ -10,7 +10,7 @@ import { createFrame, setFrameShot } from "@/lib/frames/queries";
  */
 export async function POST(request: Request, ctx: RouteContext<"/api/apps/[id]/frames">) {
   const { id: appId } = await ctx.params;
-  const app = getDb().select().from(apps).where(eq(apps.id, appId)).get();
+  const app = (await currentDb()).select().from(apps).where(eq(apps.id, appId)).get();
   if (!app) return Response.json({ error: "App not found" }, { status: 404 });
 
   const form = await request.formData();
@@ -23,7 +23,7 @@ export async function POST(request: Request, ctx: RouteContext<"/api/apps/[id]/f
   try {
     if (typeof frameId === "string" && frameId) {
       const file = await storeScreenshot(appId, uploads[0]);
-      const frame = setFrameShot(appId, frameId, locale, file.id);
+      const frame = await setFrameShot(appId, frameId, locale, file.id);
       if (!frame) return Response.json({ error: "Frame not found" }, { status: 404 });
       return Response.json({ frames: [frame], files: [file] });
     }
@@ -33,7 +33,7 @@ export async function POST(request: Request, ctx: RouteContext<"/api/apps/[id]/f
     for (const upload of uploads) {
       const file = await storeScreenshot(appId, upload);
       stored.push(file);
-      created.push(createFrame(appId, locale, file.id));
+      created.push(await createFrame(appId, locale, file.id));
     }
     return Response.json({ frames: created, files: stored });
   } catch (error) {

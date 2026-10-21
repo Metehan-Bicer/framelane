@@ -44,21 +44,23 @@ export default function Home() {
 
 async function Library() {
   const apps = await listApps();
-  const cards: AppCardData[] = apps.map((app) => {
-    const frames = listFrames(app.id);
-    return {
-      id: app.id,
-      name: app.name,
-      bundleId: app.bundleId,
-      locales: app.locales,
-      frameCount: frames.length,
-      design: app.design ? parseDesign(app.design) : DEFAULT_DESIGN,
-      previews: frames.slice(0, 3).map((frame) => ({
-        caption: frame.captions[app.primaryLocale] ?? { badge: "", title: "", subtitle: "" },
-        fileId: frame.shots[app.primaryLocale] ?? Object.values(frame.shots)[0],
-      })),
-    };
-  });
+  const cards: AppCardData[] = await Promise.all(
+    apps.map(async (app) => {
+      const frames = await listFrames(app.id);
+      return {
+        id: app.id,
+        name: app.name,
+        bundleId: app.bundleId,
+        locales: app.locales,
+        frameCount: frames.length,
+        design: app.design ? parseDesign(app.design) : DEFAULT_DESIGN,
+        previews: frames.slice(0, 3).map((frame) => ({
+          caption: frame.captions[app.primaryLocale] ?? { badge: "", title: "", subtitle: "" },
+          fileId: frame.shots[app.primaryLocale] ?? Object.values(frame.shots)[0],
+        })),
+      };
+    }),
+  );
   const frameTotal = cards.reduce((sum, card) => sum + card.frameCount, 0);
   const localeTotal = new Set(cards.flatMap((card) => card.locales)).size;
 
@@ -90,14 +92,17 @@ function EmptyLibrary() {
           <div
             key={rotate}
             className="absolute bottom-0 left-1/2 h-36 w-[66px] origin-bottom rounded-[10px] border border-line bg-gradient-to-b from-raised to-white shadow-soft"
-            style={{ transform: `translateX(-50%) translateX(${(index - 1) * 46}px) rotate(${rotate}deg)`, zIndex: index === 1 ? 2 : 1 }}
+            style={{
+              transform: `translateX(-50%) translateX(${(index - 1) * 46}px) rotate(${rotate}deg)`,
+              zIndex: index === 1 ? 2 : 1,
+            }}
           />
         ))}
       </div>
       <h1 className="text-2xl font-semibold tracking-tight">Add your first app</h1>
       <p className="mt-3 text-sm leading-relaxed text-ink-2">
-        Drop in raw screenshots, caption them in every language and export the exact sizes App Store Connect asks
-        for.
+        Drop in raw screenshots, caption them in every language and export the exact sizes App Store Connect
+        asks for.
       </p>
       <div className="mt-7">
         <NewAppButton />

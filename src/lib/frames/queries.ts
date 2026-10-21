@@ -1,24 +1,24 @@
 import "server-only";
 
 import { and, asc, eq, sql } from "drizzle-orm";
-import { getDb } from "@/db";
+import { currentDb } from "@/db";
 import { frames } from "@/db/schema";
 import type { Caption } from "@/lib/design/model";
 
-export function listFrames(appId: string) {
-  return getDb().select().from(frames).where(eq(frames.appId, appId)).orderBy(asc(frames.position)).all();
+export async function listFrames(appId: string) {
+  return (await currentDb()).select().from(frames).where(eq(frames.appId, appId)).orderBy(asc(frames.position)).all();
 }
 
-export function getFrame(appId: string, frameId: string) {
-  return getDb()
+export async function getFrame(appId: string, frameId: string) {
+  return (await currentDb())
     .select()
     .from(frames)
     .where(and(eq(frames.appId, appId), eq(frames.id, frameId)))
     .get();
 }
 
-export function createFrame(appId: string, locale: string, fileId: string) {
-  const db = getDb();
+export async function createFrame(appId: string, locale: string, fileId: string) {
+  const db = await currentDb();
   const { next } = db
     .select({ next: sql<number>`coalesce(max(${frames.position}) + 1, 0)` })
     .from(frames)
@@ -31,10 +31,10 @@ export function createFrame(appId: string, locale: string, fileId: string) {
     .get();
 }
 
-export function setFrameShot(appId: string, frameId: string, locale: string, fileId: string) {
-  const frame = getFrame(appId, frameId);
+export async function setFrameShot(appId: string, frameId: string, locale: string, fileId: string) {
+  const frame = await getFrame(appId, frameId);
   if (!frame) return undefined;
-  return getDb()
+  return (await currentDb())
     .update(frames)
     .set({ shots: { ...frame.shots, [locale]: fileId } })
     .where(eq(frames.id, frameId))
@@ -42,10 +42,10 @@ export function setFrameShot(appId: string, frameId: string, locale: string, fil
     .get();
 }
 
-export function setFrameCaption(appId: string, frameId: string, locale: string, caption: Caption) {
-  const frame = getFrame(appId, frameId);
+export async function setFrameCaption(appId: string, frameId: string, locale: string, caption: Caption) {
+  const frame = await getFrame(appId, frameId);
   if (!frame) return undefined;
-  return getDb()
+  return (await currentDb())
     .update(frames)
     .set({ captions: { ...frame.captions, [locale]: caption } })
     .where(eq(frames.id, frameId))
@@ -54,8 +54,8 @@ export function setFrameCaption(appId: string, frameId: string, locale: string, 
 }
 
 /** Rewrites positions in the given order. Ids that do not belong to the app are ignored. */
-export function reorderFrames(appId: string, orderedIds: string[]) {
-  const db = getDb();
+export async function reorderFrames(appId: string, orderedIds: string[]) {
+  const db = await currentDb();
   db.transaction((tx) => {
     orderedIds.forEach((id, position) => {
       tx.update(frames)
@@ -66,8 +66,8 @@ export function reorderFrames(appId: string, orderedIds: string[]) {
   });
 }
 
-export function deleteFrame(appId: string, frameId: string) {
-  getDb()
+export async function deleteFrame(appId: string, frameId: string) {
+  (await currentDb())
     .delete(frames)
     .where(and(eq(frames.appId, appId), eq(frames.id, frameId)))
     .run();

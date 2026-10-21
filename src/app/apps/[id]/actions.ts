@@ -12,19 +12,19 @@ import { upsertListing } from "@/lib/listings/queries";
 // actions only validate and persist. They do not revalidate the page.
 
 export async function saveDesign(appId: string, design: unknown) {
-  updateAppDesign(appId, designSchema.parse(design));
+  await updateAppDesign(appId, designSchema.parse(design));
 }
 
 export async function saveCaption(appId: string, frameId: string, locale: string, caption: unknown) {
-  setFrameCaption(appId, frameId, z.string().refine(isAppStoreLocale).parse(locale), captionSchema.parse(caption));
+  await setFrameCaption(appId, frameId, z.string().refine(isAppStoreLocale).parse(locale), captionSchema.parse(caption));
 }
 
 export async function saveFrameOrder(appId: string, orderedIds: unknown) {
-  reorderFrames(appId, z.array(z.string()).parse(orderedIds));
+  await reorderFrames(appId, z.array(z.string()).parse(orderedIds));
 }
 
 export async function removeFrame(appId: string, frameId: string) {
-  deleteFrame(appId, frameId);
+  await deleteFrame(appId, frameId);
 }
 
 export async function saveLocales(appId: string, locales: unknown) {
@@ -32,11 +32,11 @@ export async function saveLocales(appId: string, locales: unknown) {
   if (!app) throw new Error("App not found");
   const parsed = z.array(z.string().refine(isAppStoreLocale)).min(1).parse(locales);
   // The primary locale always stays first.
-  updateAppLocales(appId, [app.primaryLocale, ...parsed.filter((code) => code !== app.primaryLocale)]);
+  await updateAppLocales(appId, [app.primaryLocale, ...parsed.filter((code) => code !== app.primaryLocale)]);
 }
 
 export async function saveListing(appId: string, locale: string, listing: unknown) {
-  upsertListing(appId, z.string().refine(isAppStoreLocale).parse(locale), listingSchema.parse(listing));
+  await upsertListing(appId, z.string().refine(isAppStoreLocale).parse(locale), listingSchema.parse(listing));
 }
 
 /**
@@ -48,9 +48,9 @@ export async function importListings(appId: string, imported: unknown) {
   if (!app) throw new Error("App not found");
   const entries = Object.entries(z.record(z.string(), listingSchema).parse(imported));
   const accepted = entries.filter(([locale]) => isAppStoreLocale(locale));
-  for (const [locale, listing] of accepted) upsertListing(appId, locale, listing);
+  for (const [locale, listing] of accepted) await upsertListing(appId, locale, listing);
   const locales = [...new Set([...app.locales, ...accepted.map(([locale]) => locale)])];
-  if (locales.length !== app.locales.length) updateAppLocales(appId, locales);
+  if (locales.length !== app.locales.length) await updateAppLocales(appId, locales);
   return {
     locales,
     imported: accepted.map(([locale]) => locale),

@@ -24,7 +24,7 @@ async function EditorLoader({ params }: { params: PageProps<"/apps/[id]">["param
   const { id } = await params;
   const app = await getApp(id);
   if (!app) notFound();
-  const frames = listFrames(app.id);
+  const frames = await listFrames(app.id);
 
   return (
     <Editor

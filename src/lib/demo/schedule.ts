@@ -1,22 +1,9 @@
-import path from "node:path";
-import { getDb } from "@/db";
-import { uploadsDir } from "@/lib/paths";
 import { isDemo } from "./mode";
-import { resetDemo } from "./seed";
+import { cleanUpWorkspaces } from "./workspaces";
 
-/** In the public demo, reset to Daybook when the server starts and every night at 03:00. */
-export function startDemoResets() {
+/** In the public demo, remove unused visitor workspaces on start and every hour. */
+export function startDemoCleanup() {
   if (!isDemo()) return;
-  const reset = () => resetDemo(getDb(), uploadsDir, path.join(process.cwd(), "demo/screens"));
-  reset();
-  const scheduleNext = () => {
-    const next = new Date();
-    next.setHours(3, 0, 0, 0);
-    if (next.getTime() <= Date.now()) next.setDate(next.getDate() + 1);
-    setTimeout(() => {
-      reset();
-      scheduleNext();
-    }, next.getTime() - Date.now());
-  };
-  scheduleNext();
+  cleanUpWorkspaces();
+  setInterval(() => cleanUpWorkspaces(), 60 * 60 * 1000).unref();
 }

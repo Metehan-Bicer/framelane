@@ -35,7 +35,7 @@ async function PublishLoader({ params }: { params: PageProps<"/apps/[id]/publish
         locales: app.locales,
       }}
       design={app.design ? parseDesign(app.design) : DEFAULT_DESIGN}
-      frames={listFrames(app.id).map(({ id, captions, shots }) => ({ id, captions, shots }))}
+      frames={(await listFrames(app.id)).map(({ id, captions, shots }) => ({ id, captions, shots }))}
     />
   );
 }

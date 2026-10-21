@@ -65,7 +65,7 @@ export async function loadPublish(appId: string): Promise<PublishView> {
   const app = await getApp(appId);
   if (!app) throw new Error("App not found");
   try {
-    return { connected: true, keyId: summary.keyId, state: await loadPublishState(client, app, getListings(app.id)) };
+    return { connected: true, keyId: summary.keyId, state: await loadPublishState(client, app, await getListings(app.id)) };
   } catch (error) {
     return { connected: true, keyId: summary.keyId, error: describeError(error) };
   }
@@ -77,7 +77,7 @@ export async function pushMetadata(appId: string): Promise<{ results: ApplyResul
   const app = await getApp(appId);
   if (!client || !app) return { error: "Connect App Store Connect first" };
   try {
-    return { results: await applyMetadata(client, app, getListings(app.id)) };
+    return { results: await applyMetadata(client, app, await getListings(app.id)) };
   } catch (error) {
     return { error: describeError(error) };
   }

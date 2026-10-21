@@ -1,28 +1,30 @@
 import "server-only";
 
-import fs from "node:fs";
-import path from "node:path";
-import Database from "better-sqlite3";
-import { drizzle } from "drizzle-orm/better-sqlite3";
-import { migrate } from "drizzle-orm/better-sqlite3/migrator";
-import { dataDir } from "@/lib/paths";
-import * as schema from "./schema";
+import { isDemo } from "@/lib/demo/mode";
+import { currentWorkspace, type Store } from "@/lib/demo/workspaces";
+import { dataDir, uploadsDir } from "@/lib/paths";
+import { openDb, type Db } from "./open";
 
-function open() {
-  fs.mkdirSync(dataDir, { recursive: true });
-  const sqlite = new Database(path.join(dataDir, "framelane.db"));
-  sqlite.pragma("journal_mode = WAL");
-  sqlite.pragma("foreign_keys = ON");
-  const db = drizzle(sqlite, { schema });
-  migrate(db, { migrationsFolder: path.join(process.cwd(), "drizzle") });
-  return db;
-}
+export { openDb, type Db, type Store };
 
 // Opened on first use so builds never touch the database. Kept on globalThis to
 // survive hot reloads in development.
-const globalForDb = globalThis as unknown as { framelaneDb?: ReturnType<typeof open> };
+const globalForDb = globalThis as unknown as { framelaneDb?: Db };
 
+/** The instance database. Outside the public demo this is the only one. */
 export function getDb() {
-  globalForDb.framelaneDb ??= open();
+  globalForDb.framelaneDb ??= openDb(dataDir);
   return globalForDb.framelaneDb;
+}
+
+/**
+ * The database and upload folder for the current request. In the public demo every visitor has
+ * their own workspace (src/lib/demo/workspaces.ts); everywhere else it is the instance database.
+ */
+export async function currentStore(): Promise<Store> {
+  return isDemo() ? currentWorkspace() : { db: getDb(), uploadsDir };
+}
+
+export async function currentDb() {
+  return (await currentStore()).db;
 }

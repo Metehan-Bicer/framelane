@@ -9,7 +9,7 @@ import { readImageInfo } from "@/lib/files/image-size";
 
 /**
  * Daybook, a fictional journaling app with screenshots, captions and metadata in English and
- * Turkish. Used by `npm run seed:demo` and by the public demo, which resets to it every night.
+ * Turkish. Used by `npm run seed:demo` and by the public demo, where every visitor starts from their own copy.
  */
 export const DEMO_BUNDLE_ID = "com.example.daybook";
 
@@ -158,13 +158,6 @@ export function seedDemo(db: Db, uploadsDir: string, screensDir: string) {
     db.insert(listings).values({ appId, locale, fields }).run();
   }
   return appId;
-}
-
-/** Deletes every app and uploaded file, then adds Daybook again. Only for the public demo. */
-export function resetDemo(db: Db, uploadsDir: string, screensDir: string) {
-  for (const app of db.select({ id: apps.id }).from(apps).all()) removeApp(db, uploadsDir, app.id);
-  fs.rmSync(uploadsDir, { recursive: true, force: true });
-  return seedDemo(db, uploadsDir, screensDir);
 }
 
 function removeApp(db: Db, uploadsDir: string, appId: string) {

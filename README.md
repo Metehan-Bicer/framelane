@@ -20,7 +20,7 @@ fastlane. Framelane does the whole flow in one place, runs on your own machine, 
 your own API key.
 
 <p align="center">
-  <b><a href="https://framelane.metehanbicer.com">Try the live demo</a></b> · resets every night, App Store Connect turned off
+  <b><a href="https://framelane.metehanbicer.com">Try the live demo</a></b> · your own private copy, kept for 7 days after your last visit, App Store Connect turned off
 </p>
 
 <p align="center">

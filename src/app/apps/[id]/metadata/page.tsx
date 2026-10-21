@@ -36,8 +36,8 @@ async function MetadataLoader({ params }: { params: PageProps<"/apps/[id]/metada
         locales: app.locales,
       }}
       design={app.design ? parseDesign(app.design) : DEFAULT_DESIGN}
-      frames={listFrames(app.id).map(({ id, captions, shots }) => ({ id, captions, shots }))}
-      initialListings={getListings(app.id)}
+      frames={(await listFrames(app.id)).map(({ id, captions, shots }) => ({ id, captions, shots }))}
+      initialListings={await getListings(app.id)}
     />
   );
 }

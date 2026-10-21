@@ -26,7 +26,7 @@ export async function createApp(_: CreateAppState, formData: FormData): Promise<
   }
 
   try {
-    const app = insertApp(parsed.data);
+    const app = await insertApp(parsed.data);
     revalidatePath("/");
     return { createdId: app.id };
   } catch (error) {
