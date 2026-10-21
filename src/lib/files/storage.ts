@@ -4,6 +4,8 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { eq } from "drizzle-orm";
 import { currentStore } from "@/db";
+import { isDemo } from "@/lib/demo/mode";
+import { uploadedBytes, WORKSPACE_UPLOAD_LIMIT } from "@/lib/demo/workspaces";
 import { files } from "@/db/schema";
 import { readImageInfo } from "./image-size";
 
@@ -19,6 +21,9 @@ export async function storeScreenshot(appId: string, file: File) {
 
   const id = crypto.randomUUID();
   const { db, uploadsDir } = await currentStore();
+  if (isDemo() && uploadedBytes(uploadsDir) + bytes.length > WORKSPACE_UPLOAD_LIMIT) {
+    throw new UploadError("Your demo copy is full (100 MB of screenshots). Use Start over in the banner to begin again.");
+  }
   await fs.mkdir(uploadsDir, { recursive: true });
   await fs.writeFile(path.join(uploadsDir, id), bytes);
   return db

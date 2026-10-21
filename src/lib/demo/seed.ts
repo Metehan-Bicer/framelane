@@ -13,6 +13,15 @@ import { readImageInfo } from "@/lib/files/image-size";
  */
 export const DEMO_BUNDLE_ID = "com.example.daybook";
 
+/**
+ * Fixed ids, so every copy of the demo has the same app, frame and file ids. The public demo shows a
+ * visitor's first page from a shared copy and everything after it from their own (src/proxy.ts);
+ * links and images on that first page must work in both.
+ */
+const DEMO_APP_ID = "da7b0000-0000-4000-8000-000000000000";
+const demoFrameId = (position: number) => `da7b0000-0000-4000-8001-${String(position).padStart(12, "0")}`;
+const demoFileId = (position: number, locale: number) => `da7b0000-0000-4000-8002-${String(position * 10 + locale).padStart(12, "0")}`;
+
 const design: Design = {
   template: "headline",
   background: { kind: "gradient", from: "#ffe3cf", to: "#f6b38f", angle: 160 },
@@ -121,7 +130,7 @@ export function seedDemo(db: Db, uploadsDir: string, screensDir: string) {
   const previous = db.select().from(apps).where(eq(apps.bundleId, DEMO_BUNDLE_ID)).get();
   if (previous) removeApp(db, uploadsDir, previous.id);
 
-  const appId = crypto.randomUUID();
+  const appId = DEMO_APP_ID;
   db.insert(apps)
     .values({
       id: appId,
@@ -135,14 +144,14 @@ export function seedDemo(db: Db, uploadsDir: string, screensDir: string) {
 
   screens.forEach((screen, position) => {
     const shots: Record<string, string> = {};
-    for (const locale of ["en-US", "tr"]) {
+    for (const [index, locale] of ["en-US", "tr"].entries()) {
       // The Dockerfile copies demo/screens next to the server; keep it out of file tracing.
       const bytes = fs.readFileSync(
         /*turbopackIgnore: true*/ path.join(/*turbopackIgnore: true*/ screensDir, locale, screen.file),
       );
       const info = readImageInfo(bytes);
       if (!info) throw new Error(`${screen.file} is not a PNG`);
-      const id = crypto.randomUUID();
+      const id = demoFileId(position, index);
       fs.writeFileSync(path.join(uploadsDir, id), bytes);
       db.insert(files)
         .values({ id, appId, ...info })
@@ -150,7 +159,7 @@ export function seedDemo(db: Db, uploadsDir: string, screensDir: string) {
       shots[locale] = id;
     }
     db.insert(frames)
-      .values({ id: crypto.randomUUID(), appId, position, captions: screen.captions, shots })
+      .values({ id: demoFrameId(position), appId, position, captions: screen.captions, shots })
       .run();
   });
 

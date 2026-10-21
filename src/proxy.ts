@@ -6,6 +6,7 @@ const WORKSPACE_COOKIE = "framelane-demo";
 /** The cookie outlives the workspace; the server removes workspaces 7 days after their last use. */
 const COOKIE_MAX_AGE = 90 * 24 * 60 * 60;
 const WORKSPACE_ID = /^[0-9a-f-]{36}$/;
+const FIRST_VISIT_HEADER = "x-framelane-first-visit";
 
 /**
  * Optional password protection. Set FRAMELANE_PASSWORD (and optionally FRAMELANE_USERNAME,
@@ -28,12 +29,18 @@ export function proxy(request: NextRequest) {
   const demo = process.env.FRAMELANE_DEMO === "1" || process.env.FRAMELANE_DEMO === "true";
   if (!demo) return NextResponse.next();
 
+  // Only the proxy may mark a request as a first visit.
+  const headers = new Headers(request.headers);
+  headers.delete(FIRST_VISIT_HEADER);
   const current = request.cookies.get(WORKSPACE_COOKIE)?.value;
-  if (current && WORKSPACE_ID.test(current)) return NextResponse.next();
-  // First visit: hand out a workspace id and let this same request use it.
+  if (current && WORKSPACE_ID.test(current)) return NextResponse.next({ request: { headers } });
+  // First visit: hand out a workspace id. A page view is served from the shared read-only copy, and the
+  // visitor's own copy is created when the browser sends the cookie back, so crawlers (which keep no
+  // cookies) never create one. Anything that writes uses the new id right away.
   const id = crypto.randomUUID();
-  request.cookies.set(WORKSPACE_COOKIE, id);
-  const response = NextResponse.next({ request: { headers: request.headers } });
+  const reading = request.method === "GET" || request.method === "HEAD";
+  if (reading) headers.set(FIRST_VISIT_HEADER, "1");
+  const response = NextResponse.next({ request: { headers } });
   response.cookies.set(WORKSPACE_COOKIE, id, {
     httpOnly: true,
     sameSite: "lax",

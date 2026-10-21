@@ -2,7 +2,7 @@ import "server-only";
 
 import fs from "node:fs";
 import path from "node:path";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { openDb, type Db } from "@/db/open";
 import { dataDir } from "@/lib/paths";
 import { seedDemo } from "./seed";
@@ -17,10 +17,15 @@ export const WORKSPACE_TTL_DAYS = 7;
 const TTL_MS = WORKSPACE_TTL_DAYS * 24 * 60 * 60 * 1000;
 /** Upper bound on stored workspaces; the least recently used go first. */
 const MAX_WORKSPACES = 2000;
+/** Upload room per workspace, including the demo's own screenshots. */
+export const WORKSPACE_UPLOAD_LIMIT = 100 * 1024 * 1024;
 /** Open SQLite handles kept in memory; the least recently used are closed. */
 const MAX_OPEN = 40;
 
 const ID = /^[0-9a-f-]{36}$/;
+/** The copy that first page views are read from; nothing writes to it. */
+const SHARED = "shared";
+
 export const isWorkspaceId = (id: string | undefined): id is string => !!id && ID.test(id);
 
 export const workspacesDir = () => path.join(dataDir, "demo");
@@ -33,9 +38,11 @@ const globalForWorkspaces = globalThis as unknown as { framelaneWorkspaces?: Map
 const open = (globalForWorkspaces.framelaneWorkspaces ??= new Map());
 
 export async function currentWorkspace(): Promise<Store> {
+  // A first page view (marked by src/proxy.ts) is read from the shared copy; the visitor's own copy is
+  // created on their next request, once the browser sends the cookie back.
+  if ((await headers()).get("x-framelane-first-visit")) return workspace(SHARED);
   const id = (await cookies()).get(WORKSPACE_COOKIE)?.value;
-  // The proxy always sets the cookie; requests without one share a throwaway "guest" workspace.
-  return workspace(isWorkspaceId(id) ? id : "guest");
+  return workspace(isWorkspaceId(id) ? id : SHARED);
 }
 
 export function workspace(id: string): Store {
@@ -63,6 +70,12 @@ export function workspace(id: string): Store {
 function close(id: string) {
   open.get(id)?.db.close();
   open.delete(id);
+}
+
+/** Bytes stored in a workspace's upload folder. */
+export function uploadedBytes(uploadsDir: string) {
+  if (!fs.existsSync(uploadsDir)) return 0;
+  return fs.readdirSync(uploadsDir).reduce((sum, name) => sum + fs.statSync(path.join(uploadsDir, name)).size, 0);
 }
 
 /** Deletes a workspace; the next request from its owner starts again from Daybook. */

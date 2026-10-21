@@ -5,7 +5,8 @@ All notable changes are listed here. The project follows [Semantic Versioning](h
 ## Unreleased
 
 - Public demo: every visitor gets a private copy of the Daybook demo instead of one shared copy that reset every
-  night. A copy is kept for 7 days after its last use, and "Start over" in the banner resets it.
+  night. A copy is kept for 7 days after its last use, and "Start over" in the banner resets it. A first page view
+  is read from a shared copy, so crawlers never create one, and each copy has room for 100 MB of screenshots.
 
 ## 0.1.2
 

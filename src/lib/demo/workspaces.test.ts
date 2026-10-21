@@ -4,11 +4,11 @@ import path from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("server-only", () => ({}));
-vi.mock("next/headers", () => ({ cookies: vi.fn() }));
+vi.mock("next/headers", () => ({ cookies: vi.fn(), headers: vi.fn() }));
 vi.mock("@/db/open", () => ({ openDb: vi.fn() }));
 vi.mock("./seed", () => ({ seedDemo: vi.fn() }));
 
-const { cleanUpWorkspaces, isWorkspaceId, WORKSPACE_TTL_DAYS } = await import("./workspaces");
+const { cleanUpWorkspaces, isWorkspaceId, uploadedBytes, WORKSPACE_TTL_DAYS } = await import("./workspaces");
 
 const DAY = 24 * 60 * 60 * 1000;
 let root = "";
@@ -42,5 +42,13 @@ describe("demo workspaces", () => {
   it("does nothing when there are no workspaces yet", () => {
     root = path.join(os.tmpdir(), `framelane-missing-${Date.now()}`);
     expect(cleanUpWorkspaces(root)).toEqual([]);
+  });
+
+  it("adds up the bytes in an upload folder", () => {
+    root = fs.mkdtempSync(path.join(os.tmpdir(), "framelane-up-"));
+    fs.writeFileSync(path.join(root, "a"), Buffer.alloc(1000));
+    fs.writeFileSync(path.join(root, "b"), Buffer.alloc(24));
+    expect(uploadedBytes(root)).toBe(1024);
+    expect(uploadedBytes(path.join(root, "missing"))).toBe(0);
   });
 });
