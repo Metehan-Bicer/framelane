@@ -18,11 +18,17 @@ type ExportInput = {
   onProgress: (done: number, total: number) => void;
 };
 
-/**
- * Renders every frame for every locale at the exact App Store size and returns a zip:
- * `<locale>/<display>/01.png`, the layout fastlane `deliver` expects to upload.
- */
-export async function exportScreenshots({ app, frames, locales, design, display, onProgress }: ExportInput) {
+type SetInput = {
+  app: EditorApp;
+  frames: EditorFrame[];
+  locale: string;
+  design: Design;
+  display: DisplaySize;
+  onFrame?: () => void;
+};
+
+/** Renders one language's frames as PNGs at the exact App Store size, in order. */
+export async function renderScreenshotSet({ app, frames, locale, design, display, onFrame }: SetInput) {
   const size = display.sizes[0];
   await loadCaptionFont(design.font);
   const canvas = document.createElement("canvas");
@@ -31,28 +37,46 @@ export async function exportScreenshots({ app, frames, locales, design, display,
   const ctx = canvas.getContext("2d");
   if (!ctx) throw new Error("Canvas is not available");
 
+  const pngs: Blob[] = [];
+  for (const frame of frames) {
+    const fileId = shotFor(frame, locale, app.primaryLocale);
+    renderFrame(ctx, {
+      width: size.width,
+      height: size.height,
+      design,
+      caption: captionFor(frame, locale),
+      screenshot: fileId ? await loadShot(fileId) : null,
+      fontFamily: CAPTION_FONT_FAMILIES[design.font],
+    });
+    pngs.push(
+      await new Promise<Blob>((resolve, reject) =>
+        canvas.toBlob((value) => (value ? resolve(value) : reject(new Error("PNG encoding failed"))), "image/png"),
+      ),
+    );
+    onFrame?.();
+  }
+  return pngs;
+}
+
+/**
+ * Renders every frame for every locale and downloads a zip laid out as
+ * `<locale>/<display>/01.png`.
+ */
+export async function exportScreenshots({ app, frames, locales, design, display, onProgress }: ExportInput) {
   const entries: Record<string, Uint8Array> = {};
   const total = frames.length * locales.length;
   let done = 0;
-
   for (const locale of locales) {
-    for (const [index, frame] of frames.entries()) {
-      const fileId = shotFor(frame, locale, app.primaryLocale);
-      const screenshot = fileId ? await loadShot(fileId) : null;
-      renderFrame(ctx, {
-        width: size.width,
-        height: size.height,
-        design,
-        caption: captionFor(frame, locale),
-        screenshot,
-        fontFamily: CAPTION_FONT_FAMILIES[design.font],
-      });
-      const blob = await new Promise<Blob>((resolve, reject) =>
-        canvas.toBlob((value) => (value ? resolve(value) : reject(new Error("PNG encoding failed"))), "image/png"),
-      );
-      const name = `${locale}/${display.type}/${String(index + 1).padStart(2, "0")}.png`;
-      entries[name] = new Uint8Array(await blob.arrayBuffer());
-      onProgress(++done, total);
+    const pngs = await renderScreenshotSet({
+      app,
+      frames,
+      locale,
+      design,
+      display,
+      onFrame: () => onProgress(++done, total),
+    });
+    for (const [index, png] of pngs.entries()) {
+      entries[`${locale}/${display.type}/${String(index + 1).padStart(2, "0")}.png`] = new Uint8Array(await png.arrayBuffer());
     }
   }
 

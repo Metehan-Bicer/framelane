@@ -88,10 +88,7 @@ export function MetadataEditor({ app, design, frames, initialListings }: Props) 
       <Topbar
         app={app}
         section="metadata"
-        locales={locales}
-        locale={locale}
-        onLocale={setLocale}
-        onAddLocale={addLocale}
+        languages={{ locales, locale, onLocale: setLocale, onAddLocale: addLocale }}
         status={status}
       >
         <button

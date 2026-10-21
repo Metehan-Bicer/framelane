@@ -22,6 +22,13 @@
       "when": 1792573782322,
       "tag": "0002_listings",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1792580012238,
+      "tag": "0003_connections",
+      "breakpoints": true
     }
   ]
 }

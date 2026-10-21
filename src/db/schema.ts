@@ -61,6 +61,17 @@ export const listings = sqliteTable(
   (table) => [primaryKey({ columns: [table.appId, table.locale] })],
 );
 
+/** Credentials for external services, with secrets encrypted at rest. */
+export const connections = sqliteTable("connections", {
+  id: text("id").primaryKey(),
+  issuerId: text("issuer_id").notNull(),
+  keyId: text("key_id").notNull(),
+  encryptedKey: text("encrypted_key").notNull(),
+  createdAt: integer("created_at", { mode: "timestamp" })
+    .notNull()
+    .default(sql`(unixepoch())`),
+});
+
 export type App = typeof apps.$inferSelect;
 export type NewApp = typeof apps.$inferInsert;
 export type StoredFile = typeof files.$inferSelect;

@@ -2,7 +2,7 @@
 
 Design, localize and ship App Store screenshots and metadata from one self-hosted app.
 
-> **Status:** early development. Screenshots and metadata work end to end; App Store Connect upload is next.
+> **Status:** early development. Screenshots, metadata and App Store Connect upload work end to end; first release is close.
 > Follow the roadmap below or watch the repo for the first release.
 
 ## Why
@@ -25,7 +25,7 @@ App Store Connect with your own API key.
 - [ ] Optional AI translation with your own key or Ollama
 - [x] Metadata editor with character counters, keyword tidying and a product page preview
 - [x] Import and export for fastlane `metadata/` folders and EAS `store.config.json`
-- [ ] Upload metadata and screenshots to App Store Connect, with a dry run diff first
+- [x] Upload metadata and screenshots to App Store Connect, with a field by field diff first
 
 **Later:** keyword suggestions, Google Play, shared templates, CLI and MCP server.
 
@@ -46,13 +46,25 @@ npm install
 npm run dev
 ```
 
+## Publishing to App Store Connect
+
+Open an app's **Publish** tab and connect an App Store Connect API key (Team Key, App Manager role). Framelane:
+
+1. finds the app by bundle ID and the version you are preparing,
+2. shows every text change field by field, old and new side by side,
+3. pushes only what changed (empty fields never erase text already in App Store Connect),
+4. replaces each language's screenshot set with your frames, rendered at the exact size.
+
+Nothing is submitted for review. The key is encrypted with AES-256-GCM and stays on your server. The encryption
+key comes from `FRAMELANE_SECRET`, or from `secret.key` next to the database: back it up with your data.
+
 ## Development
 
 | Command | What it does |
 | --- | --- |
 | `npm run dev` | Start the dev server |
 | `npm test` | Unit tests (Vitest) |
-| `npm run test:e2e` | End-to-end tests (Playwright, needs `npm run build` first) |
+| `npm run test:e2e` | End-to-end tests (Playwright, needs `npm run build` first). Runs against a fake App Store Connect in `e2e/fake-asc.mjs` |
 | `npm run lint` / `npm run typecheck` | ESLint and TypeScript |
 | `npm run db:generate` | Create a migration after changing `src/db/schema.ts` |
 | `npm run render:sheet -- <dir> <out.png>` | Render every template with Node, handy when changing `src/lib/design/render.ts` |

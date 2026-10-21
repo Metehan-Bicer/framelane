@@ -12,12 +12,15 @@ import type { SaveStatus } from "./use-autosave";
 
 type Props = {
   app: EditorApp;
-  section: "screenshots" | "metadata";
-  locales: string[];
-  locale: string;
-  onLocale: (code: string) => void;
-  onAddLocale: (code: string) => void;
-  status: SaveStatus;
+  section: "screenshots" | "metadata" | "publish";
+  /** Sections that edit per-language content show the language switcher. */
+  languages?: {
+    locales: string[];
+    locale: string;
+    onLocale: (code: string) => void;
+    onAddLocale: (code: string) => void;
+  };
+  status?: SaveStatus;
   /** Section specific controls, shown before the save status. */
   children?: React.ReactNode;
 };
@@ -25,10 +28,11 @@ type Props = {
 const SECTIONS = [
   { id: "screenshots", label: "Screenshots", href: (id: string) => `/apps/${id}` },
   { id: "metadata", label: "Metadata", href: (id: string) => `/apps/${id}/metadata` },
+  { id: "publish", label: "Publish", href: (id: string) => `/apps/${id}/publish` },
 ] as const;
 
 /** Header shared by every app section: identity, section tabs, languages and save state. */
-export function Topbar({ app, section, locales, locale, onLocale, onAddLocale, status, children }: Props) {
+export function Topbar({ app, section, languages, status, children }: Props) {
   return (
     <header className="flex h-14 shrink-0 items-center gap-4 border-b border-line bg-panel px-3">
       <div className="flex items-center gap-2">
@@ -59,33 +63,37 @@ export function Topbar({ app, section, locales, locale, onLocale, onAddLocale, s
       </div>
 
       <nav aria-label="Languages" className="flex min-w-0 flex-1 items-center justify-center gap-1">
-        <div className="scrollbar-none flex min-w-0 items-center gap-0.5 overflow-x-auto rounded-xl bg-raised p-1">
-          {locales.map((code) => (
-            <button
-              key={code}
-              onClick={() => onLocale(code)}
-              className="relative shrink-0 rounded-lg px-3 py-1.5 text-xs font-medium text-ink-3 transition hover:text-ink aria-pressed:text-ink"
-              aria-pressed={code === locale}
-              title={APP_STORE_LOCALES[code as keyof typeof APP_STORE_LOCALES] ?? code}
-            >
-              {code === locale && (
-                <motion.span
-                  layoutId="locale-pill"
-                  className="absolute inset-0 rounded-lg bg-panel shadow-soft"
-                  transition={{ type: "spring", stiffness: 500, damping: 38 }}
-                />
-              )}
-              <span className="relative">{code}</span>
-              {code === app.primaryLocale && <span className="relative ml-1 text-ink-3">·</span>}
-            </button>
-          ))}
-        </div>
-        <AddLocale existing={locales} onAdd={onAddLocale} />
+        {languages && (
+          <>
+            <div className="scrollbar-none flex min-w-0 items-center gap-0.5 overflow-x-auto rounded-xl bg-raised p-1">
+              {languages.locales.map((code) => (
+                <button
+                  key={code}
+                  onClick={() => languages.onLocale(code)}
+                  className="relative shrink-0 rounded-lg px-3 py-1.5 text-xs font-medium text-ink-3 transition hover:text-ink aria-pressed:text-ink"
+                  aria-pressed={code === languages.locale}
+                  title={APP_STORE_LOCALES[code as keyof typeof APP_STORE_LOCALES] ?? code}
+                >
+                  {code === languages.locale && (
+                    <motion.span
+                      layoutId="locale-pill"
+                      className="absolute inset-0 rounded-lg bg-panel shadow-soft"
+                      transition={{ type: "spring", stiffness: 500, damping: 38 }}
+                    />
+                  )}
+                  <span className="relative">{code}</span>
+                  {code === app.primaryLocale && <span className="relative ml-1 text-ink-3">·</span>}
+                </button>
+              ))}
+            </div>
+            <AddLocale existing={languages.locales} onAdd={languages.onAddLocale} />
+          </>
+        )}
       </nav>
 
       <div className="flex items-center gap-3">
         {children}
-        <SaveIndicator status={status} />
+        {status && <SaveIndicator status={status} />}
       </div>
     </header>
   );

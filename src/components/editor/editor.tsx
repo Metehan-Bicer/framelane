@@ -181,10 +181,7 @@ export function Editor({ app, initialDesign, initialFrames }: Props) {
       <Topbar
         app={app}
         section="screenshots"
-        locales={locales}
-        locale={locale}
-        onLocale={setLocale}
-        onAddLocale={addLocale}
+        languages={{ locales, locale, onLocale: setLocale, onAddLocale: addLocale }}
         status={status}
       >
         <DisplaySwitch value={displayType} onChange={setDisplayType} />
