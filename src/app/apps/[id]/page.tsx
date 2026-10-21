@@ -14,7 +14,7 @@ export async function generateMetadata(props: PageProps<"/apps/[id]">): Promise<
 
 export default function EditorPage(props: PageProps<"/apps/[id]">) {
   return (
-    <Suspense fallback={<div className="light-table h-dvh" />}>
+    <Suspense fallback={<div className="light-table h-app" />}>
       <EditorLoader params={props.params} />
     </Suspense>
   );

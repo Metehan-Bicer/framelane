@@ -84,7 +84,7 @@ export function MetadataEditor({ app, design, frames, initialListings }: Props) 
   const filledListings = Object.fromEntries(locales.map((code) => [code, withDefaults(listings[code])]));
 
   return (
-    <div className="flex h-dvh flex-col overflow-hidden bg-bg">
+    <div className="flex h-app flex-col overflow-hidden bg-bg">
       <Topbar
         app={app}
         section="metadata"

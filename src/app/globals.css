@@ -59,3 +59,16 @@ body {
 input[type="range"] {
   accent-color: var(--accent);
 }
+
+/* Full-height layouts leave room for the public demo banner when it is shown. */
+body:has([data-demo-banner]) {
+  --demo-banner-height: 2rem;
+}
+
+@utility h-app {
+  height: calc(100dvh - var(--demo-banner-height, 0px));
+}
+
+@utility min-h-app {
+  min-height: calc(100dvh - var(--demo-banner-height, 0px));
+}

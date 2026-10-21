@@ -14,7 +14,7 @@ export async function generateMetadata(props: PageProps<"/apps/[id]/publish">): 
 
 export default function PublishPage(props: PageProps<"/apps/[id]/publish">) {
   return (
-    <Suspense fallback={<div className="h-dvh bg-bg" />}>
+    <Suspense fallback={<div className="h-app bg-bg" />}>
       <PublishLoader params={props.params} />
     </Suspense>
   );

@@ -77,7 +77,7 @@ export function PublishView({ app, design, frames }: Props) {
   };
 
   return (
-    <div className="flex h-dvh flex-col overflow-hidden bg-bg">
+    <div className="flex h-app flex-col overflow-hidden bg-bg">
       <Topbar app={app} section="publish">
         <button
           onClick={refresh}

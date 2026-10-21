@@ -15,7 +15,7 @@ export async function generateMetadata(props: PageProps<"/apps/[id]/metadata">):
 
 export default function MetadataPage(props: PageProps<"/apps/[id]/metadata">) {
   return (
-    <Suspense fallback={<div className="h-dvh bg-bg" />}>
+    <Suspense fallback={<div className="h-app bg-bg" />}>
       <MetadataLoader params={props.params} />
     </Suspense>
   );

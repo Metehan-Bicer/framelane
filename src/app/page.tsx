@@ -8,7 +8,7 @@ import { listFrames } from "@/lib/frames/queries";
 
 export default function Home() {
   return (
-    <div className="flex min-h-dvh flex-col">
+    <div className="flex min-h-app flex-col">
       <header className="sticky top-0 z-10 border-b border-line bg-panel/85 backdrop-blur">
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
           <Wordmark />

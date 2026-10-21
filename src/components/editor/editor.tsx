@@ -162,7 +162,7 @@ export function Editor({ app, initialDesign, initialFrames }: Props) {
 
   return (
     <div
-      className="flex h-dvh flex-col overflow-hidden bg-bg"
+      className="flex h-app flex-col overflow-hidden bg-bg"
       onDragOver={(event) => {
         if (!event.dataTransfer.types.includes("Files")) return;
         event.preventDefault();
