@@ -8,7 +8,7 @@ import { listFrames } from "@/lib/frames/queries";
 
 export default function Home() {
   return (
-    <div className="min-h-dvh">
+    <div className="flex min-h-dvh flex-col">
       <header className="sticky top-0 z-10 border-b border-line bg-panel/85 backdrop-blur">
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
           <Wordmark />
@@ -24,11 +24,20 @@ export default function Home() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-6xl px-6 pb-24 pt-12">
+      <main className="mx-auto w-full max-w-6xl flex-1 px-6 pb-24 pt-12">
         <Suspense fallback={<LibrarySkeleton />}>
           <Library />
         </Suspense>
       </main>
+
+      <footer className="border-t border-line">
+        <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-4 px-6 text-xs text-ink-3">
+          <span>Framelane is open source under the MIT license.</span>
+          <a href="https://metehanbicer.com/" className="transition hover:text-ink">
+            A project by <span className="font-medium text-ink-2">Metehan Biçer</span>
+          </a>
+        </div>
+      </footer>
     </div>
   );
 }
